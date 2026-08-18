@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0d071d;
+  --font-pixel: "Press Start 2P", cursive;
+  --font-vt323: "VT323", monospace;
+  --font-silkscreen: "Silkscreen", cursive;
+  --font-pixelify: "Pixelify Sans", sans-serif;
+}
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('/fonts/Press_Start_2P/PressStart2P-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'VT323';
+  src: url('/fonts/VT323/VT323-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('/fonts/Silkscreen/Silkscreen-Regular.ttf') format('truetype');
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-primary);
+  color: white;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-pixel);
+  /* Prevent blur on pixel art images */
+  image-rendering: pixelated; 
+  overflow-x: hidden;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Custom 8-bit style scrollbar for parchment */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 14px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(59, 45, 29, 0.05); 
+  border-left: 2px dashed rgba(59, 45, 29, 0.2); 
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #3b2d1d; 
+  border: 3px solid transparent; 
+  background-clip: padding-box;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #5a452d; 
+}
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3b2d1d rgba(59, 45, 29, 0.05);
+}
