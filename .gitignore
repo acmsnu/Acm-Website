@@ -31,3 +31,5 @@ dist-ssr
 .gemini
 
 /docs
+backend/uploads
+*.tar.gz
