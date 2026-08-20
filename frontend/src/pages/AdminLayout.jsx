@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { getAuthToken, API_BASE_URL, fetchWithAuth } from '../utils/api';
-import { Users, Calendar, LogOut } from 'lucide-react';
+import { Users, Calendar, LogOut, Menu, X } from 'lucide-react';
 import StarrySky from '../components/StarrySky';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,6 +34,11 @@ export default function AdminLayout() {
     checkAuth();
   }, [navigate]);
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     navigate('/admin/login');
@@ -43,13 +49,47 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d071d] text-white flex">
+    <div className="min-h-screen bg-[#0d071d] text-white flex flex-col md:flex-row">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-[#1a0f30] border-b-2 border-[#ff8cbe] z-40">
+        <Link to="/" className="flex items-center gap-3">
+          <img src="/acm-logo.webp" alt="ACM Logo" className="w-8 h-8" style={{ imageRendering: 'auto' }} />
+          <img src="/logoacnsnioe.webp" alt="ACM SNIOE Logo" className="h-6 w-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+        </Link>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="text-white p-2"
+        >
+          {sidebarOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-[#1a0f30] border-r-2 border-[#ff8cbe] p-6 flex flex-col z-10 shrink-0">
-        <Link to="/" className="mb-10 flex items-center gap-3">
+      <aside className={`
+        fixed md:sticky top-0 left-0 h-full md:h-screen z-40
+        w-64 bg-[#1a0f30] border-r-2 border-[#ff8cbe] p-6 flex flex-col shrink-0
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+      `}>
+        <Link to="/" className="mb-10 hidden md:flex items-center gap-3">
           <img src="/acm-logo.webp" alt="ACM Logo" className="w-10 h-10" style={{ imageRendering: 'auto' }} />
           <img src="/logoacnsnioe.webp" alt="ACM SNIOE Logo" className="h-8 w-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
         </Link>
+
+        {/* Close button for mobile sidebar */}
+        <div className="md:hidden flex justify-end mb-6">
+          <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
         
         <nav className="flex-1 flex flex-col gap-4 font-vt323 text-2xl">
           <Link 
@@ -78,7 +118,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-8 relative">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 relative min-h-screen">
         {/* Background Decor */}
         <StarrySky count={100} />
         <div className="absolute inset-0 pointer-events-none opacity-10">

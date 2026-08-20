@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { fetchTeam, fetchWithAuth, API_BASE_URL } from '../utils/api';
-import { Plus, Edit, Trash2, X, MoveUp, MoveDown } from 'lucide-react';
+import { Plus, Edit, Trash2, X, MoveUp, MoveDown, ChevronDown, ChevronRight } from 'lucide-react';
 
 export default function AdminTeam() {
   const [coreMembers, setCoreMembers] = useState([]);
   const [subcoreMembers, setSubcoreMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [coreOpen, setCoreOpen] = useState(true);
+  const [subcoreOpen, setSubcoreOpen] = useState(true);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState(null); // null means adding new
+  const [editingMember, setEditingMember] = useState(null);
   const [formData, setFormData] = useState({ name: '', position: '', category: 'core' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
@@ -67,7 +69,6 @@ export default function AdminTeam() {
 
     try {
       if (editingMember) {
-        // Update existing details (PUT /api/team/:id)
         const res = await fetchWithAuth(`/team/${editingMember.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -75,7 +76,6 @@ export default function AdminTeam() {
         });
         if (!res.ok) throw new Error('Failed to update details');
 
-        // Update image if a new one was selected (PUT /api/team/:id/image)
         if (selectedFile) {
           const imgData = new FormData();
           imgData.append('image', selectedFile);
@@ -86,7 +86,6 @@ export default function AdminTeam() {
           if (!imgRes.ok) throw new Error('Failed to update image');
         }
       } else {
-        // Add new member (POST /api/team)
         const data = new FormData();
         data.append('name', formData.name);
         data.append('position', formData.position);
@@ -123,7 +122,6 @@ export default function AdminTeam() {
     }
   };
 
-  // Simple reordering (move item up/down locally, then save)
   const handleReorder = async (member, direction) => {
     const list = member.category === 'core' ? [...coreMembers] : [...subcoreMembers];
     const index = list.findIndex(m => m.id === member.id);
@@ -135,10 +133,8 @@ export default function AdminTeam() {
       return;
     }
     
-    // update display_order for all in the list
     const updatedItems = list.map((m, i) => ({ id: m.id, display_order: i }));
     
-    // optimistic update
     if (member.category === 'core') setCoreMembers(list);
     else setSubcoreMembers(list);
 
@@ -151,77 +147,130 @@ export default function AdminTeam() {
     } catch (err) {
       console.error(err);
       alert('Reorder failed');
-      loadData(); // revert
+      loadData();
     }
   };
 
-  const renderTable = (members, title) => (
-    <div className="mb-12">
-      <h3 className="font-pixelify text-3xl text-[#ff8cbe] mb-4 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{title}</h3>
-      <div className="bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d] overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-[#ff5ea6]/20 font-vt323 text-2xl text-white">
-              <th className="p-4 border-b-2 border-[#3b2d1d] w-16">Order</th>
-              <th className="p-4 border-b-2 border-[#3b2d1d] w-24">Photo</th>
-              <th className="p-4 border-b-2 border-[#3b2d1d]">Name</th>
-              <th className="p-4 border-b-2 border-[#3b2d1d]">Position</th>
-              <th className="p-4 border-b-2 border-[#3b2d1d] w-32">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+  const renderSection = (members, title, isOpen, setIsOpen) => (
+    <div className="mb-8">
+      {/* Collapsible Header */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between mb-4 group"
+      >
+        <h3 className="font-pixelify text-2xl md:text-3xl text-[#ff8cbe] drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{title}</h3>
+        <span className="text-[#ff8cbe] transition-transform duration-200">
+          {isOpen ? <ChevronDown size={28} /> : <ChevronRight size={28} />}
+        </span>
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d] overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#ff5ea6]/20 font-vt323 text-2xl text-white">
+                  <th className="p-4 border-b-2 border-[#3b2d1d] w-16">Order</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d] w-24">Photo</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d]">Name</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d]">Position</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d] w-32">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="p-8 text-center font-vt323 text-2xl text-gray-400">No members found.</td>
+                  </tr>
+                ) : (
+                  members.map((member, index) => (
+                    <tr key={member.id} className="border-b border-[#3b2d1d]/50 hover:bg-white/5 transition-colors font-vt323 text-xl text-gray-200">
+                      <td className="p-4">
+                        <div className="flex flex-col items-center gap-1">
+                          <button disabled={index === 0} onClick={() => handleReorder(member, 'up')} className="disabled:opacity-20 hover:text-[#ff5ea6]"><MoveUp size={16} /></button>
+                          <button disabled={index === members.length - 1} onClick={() => handleReorder(member, 'down')} className="disabled:opacity-20 hover:text-[#ff5ea6]"><MoveDown size={16} /></button>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="w-12 h-12 rounded bg-black/50 overflow-hidden border border-[#ff8cbe]/30 flex items-center justify-center">
+                          {member.image_url ? (
+                            <img src={member.image_url} alt={member.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-xs">No image</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4">{member.name}</td>
+                      <td className="p-4">{member.position}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => openEditModal(member)} className="text-blue-400 hover:text-blue-300" title="Edit">
+                            <Edit size={20} />
+                          </button>
+                          <button onClick={() => handleDelete(member.id)} className="text-red-400 hover:text-red-300" title="Delete">
+                            <Trash2 size={20} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden flex flex-col gap-3">
             {members.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="p-8 text-center font-vt323 text-2xl text-gray-400">No members found.</td>
-              </tr>
+              <div className="p-6 text-center font-vt323 text-xl text-gray-400 bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d]">No members found.</div>
             ) : (
               members.map((member, index) => (
-                <tr key={member.id} className="border-b border-[#3b2d1d]/50 hover:bg-white/5 transition-colors font-vt323 text-xl text-gray-200">
-                  <td className="p-4">
-                    <div className="flex flex-col items-center gap-1">
-                      <button disabled={index === 0} onClick={() => handleReorder(member, 'up')} className="disabled:opacity-20 hover:text-[#ff5ea6]"><MoveUp size={16} /></button>
-                      <button disabled={index === members.length - 1} onClick={() => handleReorder(member, 'down')} className="disabled:opacity-20 hover:text-[#ff5ea6]"><MoveDown size={16} /></button>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="w-12 h-12 rounded bg-black/50 overflow-hidden border border-[#ff8cbe]/30 flex items-center justify-center">
-                      {member.image_url ? (
-                        <img src={member.image_url} alt={member.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-xs">No image</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-4">{member.name}</td>
-                  <td className="p-4">{member.position}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => openEditModal(member)} className="text-blue-400 hover:text-blue-300" title="Edit">
-                        <Edit size={20} />
-                      </button>
-                      <button onClick={() => handleDelete(member.id)} className="text-red-400 hover:text-red-300" title="Delete">
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                <div key={member.id} className="bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d] p-4 flex items-center gap-4">
+                  {/* Reorder */}
+                  <div className="flex flex-col items-center gap-1 shrink-0">
+                    <button disabled={index === 0} onClick={() => handleReorder(member, 'up')} className="disabled:opacity-20 text-gray-400 hover:text-[#ff5ea6]"><MoveUp size={18} /></button>
+                    <button disabled={index === members.length - 1} onClick={() => handleReorder(member, 'down')} className="disabled:opacity-20 text-gray-400 hover:text-[#ff5ea6]"><MoveDown size={18} /></button>
+                  </div>
+
+                  {/* Photo */}
+                  <div className="w-14 h-14 rounded-lg bg-black/50 overflow-hidden border border-[#ff8cbe]/30 flex items-center justify-center shrink-0">
+                    {member.image_url ? (
+                      <img src={member.image_url} alt={member.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs font-vt323 text-gray-500">No img</span>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-pixelify text-lg text-white truncate">{member.name}</h4>
+                    <p className="font-vt323 text-base text-[#ff8cbe] truncate">{member.position}</p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button onClick={() => openEditModal(member)} className="text-blue-400 hover:text-blue-300"><Edit size={20} /></button>
+                    <button onClick={() => handleDelete(member.id)} className="text-red-400 hover:text-red-300"><Trash2 size={20} /></button>
+                  </div>
+                </div>
               ))
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="font-pixelify text-4xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">Manage Guild Members</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h2 className="font-pixelify text-3xl md:text-4xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">Manage Guild Members</h2>
         <button 
           onClick={openAddModal}
-          className="flex items-center gap-2 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-black font-vt323 text-2xl font-bold py-2 px-4 rounded border-b-4 border-[#3b2d1d] active:border-b-0 active:translate-y-[4px] transition-all"
+          className="flex items-center gap-2 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-black font-vt323 text-xl md:text-2xl font-bold py-2 px-4 rounded border-b-4 border-[#3b2d1d] active:border-b-0 active:translate-y-[4px] transition-all"
         >
-          <Plus size={24} />
+          <Plus size={20} />
           Add Member
         </button>
       </div>
@@ -230,8 +279,8 @@ export default function AdminTeam() {
         <div className="font-vt323 text-3xl text-gray-400 animate-pulse text-center mt-20">Loading members...</div>
       ) : (
         <>
-          {renderTable(coreMembers, 'Core Team')}
-          {renderTable(subcoreMembers, 'Party Members (Subcore)')}
+          {renderSection(coreMembers, 'Core Team', coreOpen, setCoreOpen)}
+          {renderSection(subcoreMembers, 'Party Members (Subcore)', subcoreOpen, setSubcoreOpen)}
         </>
       )}
 

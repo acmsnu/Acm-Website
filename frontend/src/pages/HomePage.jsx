@@ -28,6 +28,10 @@ export default function HomePage() {
       }
     };
     loadData();
+    
+    // Force scroll to top on mount/reload
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
   }, []);
 
   const handleNextEvent = () => {
@@ -49,8 +53,6 @@ export default function HomePage() {
   const { scrollY } = useScroll();
   const yStars = useTransform(scrollY, [0, 3000], [0, -400]);
   const yClouds = useTransform(scrollY, [0, 2000], [0, 200]);
-  const yArrows = useTransform(scrollY, [0, 500], [0, 200]);
-  const opacityArrows = useTransform(scrollY, [0, 300], [1, 0]);
 
   const aboutRef = useRef(null);
   const { scrollYProgress: aboutProgress } = useScroll({
@@ -194,8 +196,17 @@ export default function HomePage() {
 
         <style>{`
         @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          0% { transform: translateX(0); -webkit-transform: translateX(0); }
+          100% { transform: translateX(-50%); -webkit-transform: translateX(-50%); }
+        }
+        @-webkit-keyframes marquee {
+          0% { -webkit-transform: translateX(0); }
+          100% { -webkit-transform: translateX(-50%); }
+        }
+        .marquee-track {
+          will-change: transform;
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
         }
       `}</style>
       </div>
@@ -259,13 +270,13 @@ export default function HomePage() {
             <SplitText
               text="The ACM Student Chapter at Shiv Nadar Institution of Eminence (SNIoE) is the official computer science society dedicated to building a strong technical culture on campus. Affiliated with the global Association for Computing Machinery, the chapter bridges the gap between academic learning and real-world application by offering hands-on experience through workshops, competitions, and collaborative projects."
               className="font-vt323 font-light text-lg md:text-2xl text-gray-300 leading-relaxed opacity-90"
-              delay={0.2}
+              delay={0.1}
             />
 
             <SplitText
               text="Operating across five key domains—Competitive Programming, Web Development, Data Analytics, Artificial Intelligence & Machine Learning, and Cybersecurity—ACM SNIOE provides students with opportunities to develop practical skills, explore diverse interests, and engage in problem-solving. Driven by a commitment to curiosity, inclusivity, and growth, the chapter fosters a community where students learn, innovate, and connect with industry, research, and wider computing ecosystems."
               className="font-vt323 font-light text-lg md:text-2xl text-gray-300 leading-relaxed opacity-90 mb-8"
-              delay={1.2}
+              delay={0.5}
             />
           </motion.div>
 
@@ -275,7 +286,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: 2.1, duration: 0.8 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
               className="bg-[#1a0f30]/60 border-l-4 border-[#ff5ea6] p-6 md:p-8 rounded-r-xl text-left shadow-[0_0_30px_rgba(255,94,166,0.15)] mx-auto max-w-3xl transform hover:scale-[1.02] transition-transform"
             >
               <h3 className="font-pixelify text-2xl md:text-3xl text-white mb-4 drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)] flex items-center gap-3">
@@ -288,10 +299,15 @@ export default function HomePage() {
             </motion.div>
 
             {/* Down Arrows */}
-            <motion.div style={{ y: yArrows, opacity: opacityArrows }} className="flex flex-col items-center z-30 pointer-events-none w-full pb-[10vh] md:pb-[5vh]">
-              <img src="/arrows.webp" alt="Scroll Down" className="w-26 md:w-46 h-auto animate-bounce opacity-90 pt-8 md:pt-12 pb-2 md:pb-6" style={{ imageRendering: 'pixelated' }} />
-              <span className="font-vt323 text-lg md:text-3xl text-white tracking-widest uppercase drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">Press Start</span>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="flex flex-col items-center mt-6 md:mt-12 mb-0"
+            >
+              <img src="/arrows.webp" alt="Scroll Down" className="w-24 md:w-40 h-auto animate-bounce opacity-90 pb-2" style={{ imageRendering: 'pixelated' }} />
             </motion.div>
+
           </motion.div>
 
         </div>
@@ -307,7 +323,7 @@ export default function HomePage() {
 
         {/* Global Clouds for Page 3 */}
         <motion.img src="/cloud2.webp" alt="Cloud" className="absolute left-4 xl:left-12 top-18 xl:top-20 w-24 md:w-40 xl:w-60 opacity-90 pointer-events-none z-0" style={{ imageRendering: 'pixelated' }} />
-        <motion.img src="/cloud1.webp" alt="Cloud" className="absolute right-0 xl:right-12 bottom-[20vh] md:bottom-[26vh] lg:bottom-[36vh] xl:bottom-[75vh] w-32 md:w-48 xl:w-56 opacity-90 pointer-events-none z-0" style={{ imageRendering: 'pixelated' }} />
+        <motion.img src="/cloud1.webp" alt="Cloud" className="absolute right-0 xl:right-12 bottom-[7vh] sm:bottom-[20vh] md:bottom-[26vh] lg:bottom-[36vh] xl:bottom-[75vh] w-32 md:w-48 xl:w-56 opacity-90 pointer-events-none z-0" style={{ imageRendering: 'pixelated' }} />
 
         {/* Heading Area */}
         <div className="z-10 mt-0 mb-1 pt-6 md:pt-10 xl:pt-0">
@@ -467,7 +483,7 @@ export default function HomePage() {
       </div>
 
       {/* --- PAGE 4: MEET THE TEAM --- */}
-      <div id="team" className="min-h-screen flex flex-col relative overflow-hidden items-center justify-start text-center pt-24 md:pt-32 px-4 pb-12 z-20 -mt-[12rem] md:portrait:-mt-[20rem] lg:landscape:-mt-[5rem] xl:mt-0">
+      <div id="team" className="min-h-screen flex flex-col relative overflow-hidden items-center justify-start text-center pt-24 md:pt-32 px-4 pb-12 z-20 -mt-[6rem] sm:-mt-[12rem] md:portrait:-mt-[20rem] lg:landscape:-mt-[5rem] xl:mt-0">
         
         {/* Background Overlay */}
         <div className="absolute inset-0 pointer-events-none z-0"></div>
@@ -505,7 +521,7 @@ export default function HomePage() {
           <div className="w-[120vw] relative rotate-[-4deg] flex flex-col items-center scale-105 mb-16">
             
             {/* Row 1 Marquee */}
-            <div className="relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 50s linear infinite" }}>
+            <div className="marquee-track relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 50s linear infinite" }}>
               {[...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4)].map((member, idx) => (
                 <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
                   <div className="relative w-28 h-28 md:w-44 md:h-44">
@@ -514,7 +530,7 @@ export default function HomePage() {
                       <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
                     </div>
                   </div>
-                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
+                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
                     <h4 className="font-pixelify text-base md:text-2xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{member.name}</h4>
                     <p className="font-vt323 text-sm md:text-xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-none">{member.position}</p>
                   </div>
@@ -523,7 +539,7 @@ export default function HomePage() {
             </div>
 
             {/* Row 2 Marquee (Reverse direction) */}
-            <div className="relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 45s linear infinite reverse" }}>
+            <div className="marquee-track relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 45s linear infinite reverse" }}>
               {[...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8)].map((member, idx) => (
                 <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
                   <div className="relative w-28 h-28 md:w-44 md:h-44">
@@ -532,7 +548,7 @@ export default function HomePage() {
                       <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
                     </div>
                   </div>
-                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
+                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
                     <h4 className="font-pixelify text-base md:text-2xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{member.name}</h4>
                     <p className="font-vt323 text-sm md:text-xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-none">{member.position}</p>
                   </div>
@@ -541,7 +557,7 @@ export default function HomePage() {
             </div>
 
             {/* Row 3 Marquee */}
-            <div className="relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused]" style={{ animation: "marquee 55s linear infinite" }}>
+            <div className="marquee-track relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused]" style={{ animation: "marquee 55s linear infinite" }}>
               {[...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12)].map((member, idx) => (
                 <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
                   <div className="relative w-28 h-28 md:w-44 md:h-44">
@@ -550,7 +566,7 @@ export default function HomePage() {
                       <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
                     </div>
                   </div>
-                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
+                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
                     <h4 className="font-pixelify text-base md:text-2xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{member.name}</h4>
                     <p className="font-vt323 text-sm md:text-xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-none">{member.position}</p>
                   </div>

@@ -181,61 +181,107 @@ export default function AdminEvents() {
       {isLoading ? (
         <div className="font-vt323 text-3xl text-gray-400 animate-pulse text-center mt-20">Loading events...</div>
       ) : (
-        <div className="bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d] overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#ff5ea6]/20 font-vt323 text-2xl text-white">
-                <th className="p-4 border-b-2 border-[#3b2d1d] w-16 text-center">Featured</th>
-                <th className="p-4 border-b-2 border-[#3b2d1d] w-24">Image</th>
-                <th className="p-4 border-b-2 border-[#3b2d1d]">Title</th>
-                <th className="p-4 border-b-2 border-[#3b2d1d]">Date</th>
-                <th className="p-4 border-b-2 border-[#3b2d1d] w-32">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-8 text-center font-vt323 text-2xl text-gray-400">No events found.</td>
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d] overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#ff5ea6]/20 font-vt323 text-2xl text-white">
+                  <th className="p-4 border-b-2 border-[#3b2d1d] w-16 text-center">Featured</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d] w-24">Image</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d]">Title</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d]">Date</th>
+                  <th className="p-4 border-b-2 border-[#3b2d1d] w-32">Actions</th>
                 </tr>
-              ) : (
-                events.map((event) => (
-                  <tr key={event.id} className={`border-b border-[#3b2d1d]/50 hover:bg-white/5 transition-colors font-vt323 text-xl ${event.is_featured ? 'text-white' : 'text-gray-300'}`}>
-                    <td className="p-4 text-center">
-                      <button 
-                        onClick={() => handleToggleFeatured(event)}
-                        className={`p-2 rounded-full transition-colors ${event.is_featured ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-400'}`}
-                        title={event.is_featured ? "Remove from featured" : "Mark as featured"}
-                      >
-                        <Star size={24} fill={event.is_featured ? "currentColor" : "none"} />
-                      </button>
-                    </td>
-                    <td className="p-4">
-                      <div className="w-16 h-12 rounded bg-black/50 overflow-hidden border border-[#ff8cbe]/30 flex items-center justify-center">
-                        {event.image_url ? (
-                          <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-xs">No image</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4 font-bold">{event.title}</td>
-                    <td className="p-4">{event.date || 'TBA'}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => openEditModal(event)} className="text-blue-400 hover:text-blue-300" title="Edit">
-                          <Edit size={20} />
-                        </button>
-                        <button onClick={() => handleDelete(event.id)} className="text-red-400 hover:text-red-300" title="Delete">
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    </td>
+              </thead>
+              <tbody>
+                {events.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="p-8 text-center font-vt323 text-2xl text-gray-400">No events found.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : (
+                  events.map((event) => (
+                    <tr key={event.id} className={`border-b border-[#3b2d1d]/50 hover:bg-white/5 transition-colors font-vt323 text-xl ${event.is_featured ? 'text-white' : 'text-gray-300'}`}>
+                      <td className="p-4 text-center">
+                        <button 
+                          onClick={() => handleToggleFeatured(event)}
+                          className={`p-2 rounded-full transition-colors ${event.is_featured ? 'text-yellow-400 hover:text-yellow-300' : 'text-gray-600 hover:text-gray-400'}`}
+                          title={event.is_featured ? "Remove from featured" : "Mark as featured"}
+                        >
+                          <Star size={24} fill={event.is_featured ? "currentColor" : "none"} />
+                        </button>
+                      </td>
+                      <td className="p-4">
+                        <div className="w-16 h-12 rounded bg-black/50 overflow-hidden border border-[#ff8cbe]/30 flex items-center justify-center">
+                          {event.image_url ? (
+                            <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-xs">No image</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4 font-bold">{event.title}</td>
+                      <td className="p-4">{event.date || 'TBA'}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <button onClick={() => openEditModal(event)} className="text-blue-400 hover:text-blue-300" title="Edit">
+                            <Edit size={20} />
+                          </button>
+                          <button onClick={() => handleDelete(event.id)} className="text-red-400 hover:text-red-300" title="Delete">
+                            <Trash2 size={20} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden flex flex-col gap-3">
+            {events.length === 0 ? (
+              <div className="p-6 text-center font-vt323 text-xl text-gray-400 bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d]">No events found.</div>
+            ) : (
+              events.map((event) => (
+                <div key={event.id} className={`bg-[#1a0f30]/80 rounded-xl border-2 border-[#3b2d1d] p-4 flex flex-col gap-3 ${event.is_featured ? 'border-[#ff5ea6]/50 shadow-[0_0_10px_rgba(255,94,166,0.1)]' : ''}`}>
+                  <div className="flex items-center gap-4">
+                    {/* Featured Toggle */}
+                    <button 
+                      onClick={() => handleToggleFeatured(event)}
+                      className={`p-2 rounded-full shrink-0 transition-colors ${event.is_featured ? 'text-yellow-400 hover:text-yellow-300 bg-yellow-400/10' : 'text-gray-600 hover:text-gray-400 bg-gray-800'}`}
+                      title={event.is_featured ? "Remove from featured" : "Mark as featured"}
+                    >
+                      <Star size={20} fill={event.is_featured ? "currentColor" : "none"} />
+                    </button>
+
+                    {/* Image */}
+                    <div className="w-16 h-12 rounded bg-black/50 overflow-hidden border border-[#ff8cbe]/30 flex items-center justify-center shrink-0">
+                      {event.image_url ? (
+                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xs font-vt323 text-gray-500">No img</span>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`font-pixelify text-lg truncate ${event.is_featured ? 'text-white' : 'text-gray-300'}`}>{event.title}</h4>
+                      <p className="font-vt323 text-base text-[#ff8cbe] truncate">{event.date || 'TBA'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex justify-end items-center gap-4 pt-2 border-t border-[#3b2d1d]/50">
+                    <button onClick={() => openEditModal(event)} className="flex items-center gap-1 text-blue-400 hover:text-blue-300 font-vt323 text-lg"><Edit size={16} /> Edit</button>
+                    <button onClick={() => handleDelete(event.id)} className="flex items-center gap-1 text-red-400 hover:text-red-300 font-vt323 text-lg"><Trash2 size={16} /> Delete</button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </>
       )}
 
       {/* Modal */}

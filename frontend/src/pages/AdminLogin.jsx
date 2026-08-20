@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
 import StarrySky from '../components/StarrySky';
@@ -9,6 +9,26 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If they already have a token, check if it's valid, and if so, redirect them straight in
+    const checkExistingLogin = async () => {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/auth/verify`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            navigate('/admin/team');
+          }
+        } catch (err) {
+          console.error("Token verification failed on login screen", err);
+        }
+      }
+    };
+    checkExistingLogin();
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

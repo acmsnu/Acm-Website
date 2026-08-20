@@ -8,7 +8,7 @@ const SplitText = ({ text, className = "", delay = 0, tag: Tag = "div" }) => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.02, delayChildren: delay }
+      transition: { staggerChildren: 0.01, delayChildren: delay }
     }
   };
 

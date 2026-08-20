@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '/backend/api';
 
 export const getAuthToken = () => localStorage.getItem('adminToken');
 
