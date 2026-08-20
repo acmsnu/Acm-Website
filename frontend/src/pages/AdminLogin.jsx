@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../utils/api';
+import StarrySky from '../components/StarrySky';
 
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
@@ -41,6 +42,7 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-[#0d071d] flex flex-col items-center justify-center p-4 relative overflow-hidden text-white selection:bg-pink-500">
       
       {/* Background Decor */}
+      <StarrySky count={100} />
       <div className="absolute inset-0 pointer-events-none opacity-20">
         <img src="/bgclouds2.webp" alt="Clouds" className="w-full h-full object-cover" style={{ imageRendering: 'pixelated' }} />
       </div>

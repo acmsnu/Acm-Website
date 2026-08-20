@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import SplitText from '../components/SplitText';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { fetchTeam, fetchFeaturedEvents } from '../utils/api';
 
 export default function HomePage() {
@@ -48,6 +49,8 @@ export default function HomePage() {
   const { scrollY } = useScroll();
   const yStars = useTransform(scrollY, [0, 3000], [0, -400]);
   const yClouds = useTransform(scrollY, [0, 2000], [0, 200]);
+  const yArrows = useTransform(scrollY, [0, 500], [0, 200]);
+  const opacityArrows = useTransform(scrollY, [0, 300], [1, 0]);
 
   const aboutRef = useRef(null);
   const { scrollYProgress: aboutProgress } = useScroll({
@@ -122,9 +125,9 @@ export default function HomePage() {
           <nav className="flex items-center gap-4 xl:gap-6 font-vt323 text-xl md:text-2xl xl:tracking-wider mr-2 xl:mr-8">
             <a href="#about" className="hover:underline underline-offset-4 decoration-2">About</a>
             <a href="#events" className="hover:underline underline-offset-4 decoration-2">Events</a>
-            <div className="flex items-center ml-4 xl:ml-2">
+            <Link to="/admin/login" className="flex items-center ml-4 xl:ml-2" title="Admin Login">
               <img src="/bookgif.gif" alt="Animated Book" className="w-10 h-10 xl:w-12 xl:h-12 hover:scale-110 transition-transform cursor-pointer" style={{ imageRendering: 'pixelated' }} />
-            </div>
+            </Link>
           </nav>
         </header>
 
@@ -285,13 +288,9 @@ export default function HomePage() {
             </motion.div>
 
             {/* Down Arrows */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.8 }}
-              className="flex flex-col items-center mt-2 mb-0"
-            >
+            <motion.div style={{ y: yArrows, opacity: opacityArrows }} className="flex flex-col items-center z-30 pointer-events-none w-full pb-[10vh] md:pb-[5vh]">
               <img src="/arrows.webp" alt="Scroll Down" className="w-26 md:w-46 h-auto animate-bounce opacity-90 pt-8 md:pt-12 pb-2 md:pb-6" style={{ imageRendering: 'pixelated' }} />
+              <span className="font-vt323 text-lg md:text-3xl text-white tracking-widest uppercase drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">Press Start</span>
             </motion.div>
           </motion.div>
 

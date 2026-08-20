@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { getAuthToken, API_BASE_URL, fetchWithAuth } from '../utils/api';
 import { Users, Calendar, LogOut } from 'lucide-react';
+import StarrySky from '../components/StarrySky';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -79,6 +80,7 @@ export default function AdminLayout() {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto p-8 relative">
         {/* Background Decor */}
+        <StarrySky count={100} />
         <div className="absolute inset-0 pointer-events-none opacity-10">
           <img src="/bgclouds2.webp" alt="Clouds" className="w-full h-full object-cover" style={{ imageRendering: 'pixelated' }} />
         </div>
