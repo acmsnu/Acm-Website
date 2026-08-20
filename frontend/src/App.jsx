@@ -494,7 +494,7 @@ function App() {
           <div className="w-full flex justify-center mb-16 md:mb-24 rotate-[-4deg] transition-transform duration-500 scale-105">
             <div className="flex justify-center flex-wrap max-w-5xl gap-1 md:gap-2 p-0">
               {coreMembers.map((member, idx) => (
-                <div key={idx} className="relative flex flex-col items-center group cursor-pointer hover:scale-[1.15] hover:z-50 transition-all duration-300 mx-2 md:mx-4">
+                <div key={idx} className="relative flex flex-col items-center group cursor-pointer hover:scale-125 hover:z-50 transition-all duration-300 mx-2 md:mx-4">
                   <div className="relative w-40 h-40 md:w-56 md:h-56">
                     <img src="/character_grid.png" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
                     <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
@@ -518,9 +518,9 @@ function App() {
           <div className="w-[120vw] relative rotate-[-4deg] flex flex-col items-center scale-105 mb-16">
             
             {/* Row 1 Marquee */}
-            <div className="flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 50s linear infinite" }}>
+            <div className="relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 50s linear infinite" }}>
               {[...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4)].map((member, idx) => (
-                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-[1.15] hover:z-50 transition-all duration-300">
+                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
                   <div className="relative w-28 h-28 md:w-44 md:h-44">
                     <img src="/character_grid.png" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
                     <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
@@ -536,9 +536,9 @@ function App() {
             </div>
 
             {/* Row 2 Marquee (Reverse direction) */}
-            <div className="flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 45s linear infinite reverse" }}>
+            <div className="relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 45s linear infinite reverse" }}>
               {[...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8)].map((member, idx) => (
-                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-[1.15] hover:z-50 transition-all duration-300">
+                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
                   <div className="relative w-28 h-28 md:w-44 md:h-44">
                     <img src="/character_grid.png" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
                     <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
@@ -554,9 +554,9 @@ function App() {
             </div>
 
             {/* Row 3 Marquee */}
-            <div className="flex whitespace-nowrap w-fit hover:[animation-play-state:paused]" style={{ animation: "marquee 55s linear infinite" }}>
+            <div className="relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused]" style={{ animation: "marquee 55s linear infinite" }}>
               {[...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12)].map((member, idx) => (
-                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-[1.15] hover:z-50 transition-all duration-300">
+                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
                   <div className="relative w-28 h-28 md:w-44 md:h-44">
                     <img src="/character_grid.png" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
                     <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
