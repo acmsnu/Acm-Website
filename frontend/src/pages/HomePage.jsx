@@ -42,6 +42,17 @@ export default function HomePage() {
     setCurrentEventIndex((prev) => (prev - 1 + featuredEvents.length) % featuredEvents.length);
   };
 
+  // Auto-advance featured events every 5 seconds
+  useEffect(() => {
+    if (featuredEvents.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentEventIndex((prev) => (prev + 1) % featuredEvents.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [featuredEvents.length]);
+
   const currentEvent = featuredEvents.length > 0 ? featuredEvents[currentEventIndex] : {
     title: 'Check back soon!',
     image_url: '/eventplaceholder.webp',
@@ -345,7 +356,17 @@ export default function HomePage() {
           <img src="/parchment.webp" alt="Parchment Board" className="w-full h-[650px] md:h-[750px] xl:h-auto object-fill xl:object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]" style={{ imageRendering: 'pixelated' }} />
 
           {/* --- Content inside parchment (Mobile & iPad) --- */}
-          <div className="absolute top-[22%] bottom-[25%] left-[17%] right-[17%] overflow-hidden pointer-events-auto xl:hidden">
+          <div 
+            className="absolute top-[22%] bottom-[25%] left-[17%] right-[17%] overflow-hidden pointer-events-auto xl:hidden"
+            onTouchStart={(e) => {
+              window.touchStartX = e.changedTouches[0].screenX;
+            }}
+            onTouchEnd={(e) => {
+              const touchEndX = e.changedTouches[0].screenX;
+              if (window.touchStartX - touchEndX > 50) handleNextEvent(); // Swipe left
+              if (window.touchStartX - touchEndX < -50) handlePrevEvent(); // Swipe right
+            }}
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentEventIndex}
@@ -353,17 +374,7 @@ export default function HomePage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={(e, { offset, velocity }) => {
-                  if (offset.x < -50 || velocity.x < -500) {
-                    handleNextEvent();
-                  } else if (offset.x > 50 || velocity.x > 500) {
-                    handlePrevEvent();
-                  }
-                }}
-                className="flex flex-col items-center justify-start gap-4 w-full h-full overflow-y-auto custom-scrollbar pb-4 pt-2 cursor-grab active:cursor-grabbing"
+                className="flex flex-col items-center justify-start gap-3 md:gap-6 w-full h-full overflow-y-auto custom-scrollbar pb-4 pt-2"
               >
                 
                 {/* Left Column: Title & Image */}
@@ -394,9 +405,12 @@ export default function HomePage() {
                   </div>
 
                   {/* Pagination Arrows */}
-                  <div className="flex justify-center w-full mt-4 gap-2">
-                    <img onClick={handlePrevEvent} src="/arrow_0.webp" alt="Previous Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
-                    <img onClick={handleNextEvent} src="/arrow_1.webp" alt="Next Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                  <div className="flex flex-col items-center w-full mt-4">
+                    <div className="flex justify-center gap-2">
+                      <img onClick={handlePrevEvent} src="/arrow_0.webp" alt="Previous Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                      <img onClick={handleNextEvent} src="/arrow_1.webp" alt="Next Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                    </div>
+                    <span className="font-vt323 text-xs md:text-lg text-[#3b2d1d]/60 mt-1 uppercase tracking-wider">Swipe or click</span>
                   </div>
                 </div>
               </motion.div>
