@@ -6,8 +6,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ACM SNIOE</title>
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="background-color: #0d071d; margin: 0;">
+    <style>
+      .preloader {
+        position: fixed; inset: 0; z-index: 99999;
+        background-color: #0d071d;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+      }
+      .preloader-bg {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: cover; image-rendering: pixelated; pointer-events: none;
+      }
+      .preloader-bg-mobile { display: block; }
+      .preloader-bg-desktop { display: none; }
+      @media (min-width: 768px) {
+        .preloader-bg-mobile { display: none; }
+        .preloader-bg-desktop { display: block; }
+      }
+      .preloader-bar-container {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        margin-top: 2rem; z-index: 10;
+        width: 16rem; height: 0.75rem;
+        background-color: rgba(0,0,0,0.8);
+        border-radius: 9999px; border: 2px solid #ff5ea6;
+        overflow: hidden; box-shadow: 0 0 15px rgba(255,94,166,0.6);
+      }
+      @media (min-width: 768px) {
+        .preloader-bar-container { margin-top: 8rem; width: 24rem; height: 1rem; }
+      }
+      .preloader-bar-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(to right, #ff5ea6, #a8a0ff);
+        transition: width 0.2s ease-out;
+      }
+    </style>
+    <div id="root">
+      <div class="preloader">
+        <img src="/loadingscreentouse.webp?v=2" class="preloader-bg preloader-bg-desktop" />
+        <img src="/loadingscreenphones.webp?v=2" class="preloader-bg preloader-bg-mobile" />
+        <div class="preloader-bar-container">
+          <div id="native-preloader-bar" class="preloader-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.preloaderProgress = 0;
+      window.preloaderInterval = setInterval(() => {
+        const bar = document.getElementById('native-preloader-bar');
+        if (bar) {
+          window.preloaderProgress += Math.floor(Math.random() * 8) + 2;
+          if (window.preloaderProgress > 90) window.preloaderProgress = 90; // Wait for React to finish the last 10%
+          bar.style.width = window.preloaderProgress + '%';
+        }
+      }, 200);
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

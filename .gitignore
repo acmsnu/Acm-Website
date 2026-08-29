@@ -26,6 +26,7 @@ dist-ssr
 /resources
 /references
 /directories
+/oldacm_website
 .env
 .env.*
 .gemini

@@ -5,9 +5,11 @@ import { Plus, Edit, Trash2, X, MoveUp, MoveDown, ChevronDown, ChevronRight } fr
 export default function AdminTeam() {
   const [coreMembers, setCoreMembers] = useState([]);
   const [subcoreMembers, setSubcoreMembers] = useState([]);
+  const [facultyMembers, setFacultyMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [coreOpen, setCoreOpen] = useState(true);
   const [subcoreOpen, setSubcoreOpen] = useState(true);
+  const [facultyOpen, setFacultyOpen] = useState(true);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,6 +25,7 @@ export default function AdminTeam() {
       const data = await fetchTeam();
       setCoreMembers(data.core);
       setSubcoreMembers(data.subcore);
+      setFacultyMembers(data.faculty || []);
     } catch (err) {
       console.error(err);
       alert('Failed to load team data');
@@ -123,7 +126,11 @@ export default function AdminTeam() {
   };
 
   const handleReorder = async (member, direction) => {
-    const list = member.category === 'core' ? [...coreMembers] : [...subcoreMembers];
+    let list;
+    if (member.category === 'core') list = [...coreMembers];
+    else if (member.category === 'subcore') list = [...subcoreMembers];
+    else list = [...facultyMembers];
+    
     const index = list.findIndex(m => m.id === member.id);
     if (direction === 'up' && index > 0) {
       [list[index - 1], list[index]] = [list[index], list[index - 1]];
@@ -136,7 +143,8 @@ export default function AdminTeam() {
     const updatedItems = list.map((m, i) => ({ id: m.id, display_order: i }));
     
     if (member.category === 'core') setCoreMembers(list);
-    else setSubcoreMembers(list);
+    else if (member.category === 'subcore') setSubcoreMembers(list);
+    else setFacultyMembers(list);
 
     try {
       await fetchWithAuth('/team/reorder', {
@@ -281,6 +289,7 @@ export default function AdminTeam() {
         <>
           {renderSection(coreMembers, 'Core Team', coreOpen, setCoreOpen)}
           {renderSection(subcoreMembers, 'Party Members (Subcore)', subcoreOpen, setSubcoreOpen)}
+          {renderSection(facultyMembers, 'Faculty Sponsors', facultyOpen, setFacultyOpen)}
         </>
       )}
 
@@ -329,6 +338,7 @@ export default function AdminTeam() {
                 >
                   <option value="core">Core Team</option>
                   <option value="subcore">Party Member (Subcore)</option>
+                  <option value="faculty">Faculty Sponsor</option>
                 </select>
               </div>
 

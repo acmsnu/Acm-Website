@@ -28,8 +28,9 @@ router.get('/', async (req, res) => {
     
     const core = rows.filter(m => m.category === 'core');
     const subcore = rows.filter(m => m.category === 'subcore');
+    const faculty = rows.filter(m => m.category === 'faculty');
     
-    res.json({ core, subcore });
+    res.json({ core, subcore, faculty });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error fetching team members' });

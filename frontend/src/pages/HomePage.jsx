@@ -3,14 +3,17 @@ import SplitText from '../components/SplitText';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { fetchTeam, fetchFeaturedEvents } from '../utils/api';
+import { Menu, X } from 'lucide-react';
 
 export default function HomePage() {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [coreMembers, setCoreMembers] = useState([]);
   const [subcoreMembers, setSubcoreMembers] = useState([]);
+  const [facultyMembers, setFacultyMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -21,6 +24,7 @@ export default function HomePage() {
         setFeaturedEvents(eventsData);
         setCoreMembers(teamData.core);
         setSubcoreMembers(teamData.subcore);
+        setFacultyMembers(teamData.faculty || []);
       } catch (err) {
         console.error("Failed to fetch homepage data", err);
       } finally {
@@ -28,11 +32,115 @@ export default function HomePage() {
       }
     };
     loadData();
-    
+
     // Force scroll to top on mount/reload
     window.history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
   }, []);
+  useEffect(() => {
+    featuredEvents.forEach(event => {
+      const src = event.image_url || event.image || "/eventplaceholder.webp";
+      if (src) {
+        const img = new Image();
+        img.src = src;
+      }
+    });
+  }, [featuredEvents]);
+
+  // Mobile Marquee Auto-scroll Logic (Smooth Sub-pixel using translate3d)
+  useEffect(() => {
+    if (window.innerWidth > 768) return;
+
+    const marquees = document.querySelectorAll('.mobile-marquee');
+    if (!marquees.length) return;
+
+    let animationFrameId;
+
+    // State for each track
+    const tracksState = Array.from(marquees).map(el => ({
+      el,
+      xPos: 0,
+      isTouching: false,
+      lastTouchX: 0,
+      startX: 0,
+      startY: 0,
+      isHorizontal: null,
+      speed: parseFloat(el.getAttribute('data-speed') || "0.5")
+    }));
+
+    const handleTouchStart = (e, state) => {
+      state.isTouching = true;
+      state.lastTouchX = e.touches[0].clientX;
+      state.startX = e.touches[0].clientX;
+      state.startY = e.touches[0].clientY;
+      state.isHorizontal = null;
+    };
+
+    const handleTouchMove = (e, state) => {
+      if (!state.isTouching) return;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+
+      if (state.isHorizontal === null) {
+        const dx = Math.abs(currentX - state.startX);
+        const dy = Math.abs(currentY - state.startY);
+        if (dx > 5 || dy > 5) {
+          state.isHorizontal = dx > dy;
+        }
+      }
+
+      if (state.isHorizontal) {
+        if (e.cancelable) e.preventDefault(); // Stop native vertical scroll
+        const deltaX = currentX - state.lastTouchX;
+        state.xPos += deltaX;
+        state.lastTouchX = currentX;
+        state.el.style.transform = `translate3d(${state.xPos}px, 0, 0)`;
+      }
+    };
+
+    const handleTouchEnd = (state) => {
+      setTimeout(() => { state.isTouching = false; }, 1000);
+    };
+
+    tracksState.forEach(state => {
+      state.el.addEventListener('touchstart', (e) => handleTouchStart(e, state), { passive: true });
+      state.el.addEventListener('touchmove', (e) => handleTouchMove(e, state), { passive: false });
+      state.el.addEventListener('touchend', () => handleTouchEnd(state), { passive: true });
+      state.el.addEventListener('touchcancel', () => handleTouchEnd(state), { passive: true });
+    });
+
+    const scroll = () => {
+      tracksState.forEach((state) => {
+        if (!state.isTouching) {
+          state.xPos -= state.speed; // subtract speed to move left
+
+          // Loop logic: width of 1 original set is scrollWidth / 4
+          const setWidth = state.el.scrollWidth / 4;
+
+          if (state.speed > 0 && state.xPos <= -setWidth * 2) {
+            state.xPos += setWidth;
+          } else if (state.speed < 0 && state.xPos >= 0) {
+            state.xPos -= setWidth;
+          }
+
+          state.el.style.transform = `translate3d(${state.xPos}px, 0, 0)`;
+        }
+      });
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    animationFrameId = requestAnimationFrame(scroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      tracksState.forEach(state => {
+        state.el.removeEventListener('touchstart', handleTouchStart);
+        state.el.removeEventListener('touchmove', handleTouchMove);
+        state.el.removeEventListener('touchend', handleTouchEnd);
+        state.el.removeEventListener('touchcancel', handleTouchEnd);
+      });
+    };
+  }, [subcoreMembers]);
 
   const handleNextEvent = () => {
     setCurrentEventIndex((prev) => (prev + 1) % featuredEvents.length);
@@ -42,16 +150,16 @@ export default function HomePage() {
     setCurrentEventIndex((prev) => (prev - 1 + featuredEvents.length) % featuredEvents.length);
   };
 
-  // Auto-advance featured events every 5 seconds
+  // Auto-advance featured events every 6 seconds
   useEffect(() => {
     if (featuredEvents.length <= 1) return;
-    
+
     const interval = setInterval(() => {
       setCurrentEventIndex((prev) => (prev + 1) % featuredEvents.length);
-    }, 5000);
-    
+    }, 6000);
+
     return () => clearInterval(interval);
-  }, [featuredEvents.length]);
+  }, [featuredEvents.length, currentEventIndex]);
 
   const currentEvent = featuredEvents.length > 0 ? featuredEvents[currentEventIndex] : {
     title: 'Check back soon!',
@@ -129,19 +237,52 @@ export default function HomePage() {
         </div>
 
         {/* Navbar */}
-        <header className="flex justify-between items-center p-3 xl:p-6 z-20 relative">
-          <div className="flex items-center gap-3">
+        <header className="flex justify-between items-center p-3 xl:p-6 z-50 relative">
+          <div className="flex items-center gap-3 relative z-50">
             <img src="/acm-logo.webp" alt="ACM Logo" className="w-12 h-12 md:w-13 xl:w-14 xl:h-14" style={{ imageRendering: 'auto' }} />
-            <img src="/logoacnsnioe.webp" alt="ACM SNIOE Logo" className="h-8 md:h-14 xl:h-15 w-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+            <img src="/logoacnsnioe.webp" alt="ACM SNIOE Logo" className="h-10 md:h-14 xl:h-16 w-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
           </div>
 
-          <nav className="flex items-center gap-4 xl:gap-6 font-vt323 text-xl md:text-2xl xl:tracking-wider mr-2 xl:mr-8">
-            <a href="#about" className="hover:underline underline-offset-4 decoration-2">About</a>
-            <a href="#events" className="hover:underline underline-offset-4 decoration-2">Events</a>
-            <Link to="/admin/login" className="flex items-center ml-4 xl:ml-2" title="Admin Login">
+          {/* Right Side: Navigation & Actions */}
+          <div className="flex items-center gap-2 md:gap-4 xl:gap-6 relative z-50">
+            {/* Desktop Nav Links */}
+            <nav className="hidden md:flex items-center gap-4 xl:gap-6 font-vt323 text-xl md:text-2xl xl:tracking-wider">
+              <Link to="/" className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Home</Link>
+              <a href="#about" className="hover:underline underline-offset-4 decoration-2">About</a>
+              <Link to="/events" className="hover:underline underline-offset-4 decoration-2">Events</Link>
+              <a href="#team" className="hover:underline underline-offset-4 decoration-2">Team</a>
+            </nav>
+
+            {/* Mobile Nav Toggle */}
+            <button 
+              className="md:hidden text-[#ff8cbe] hover:text-[#ff5ea6] transition-colors p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
+            </button>
+
+            {/* Admin Book (Always visible) */}
+            <Link to="/admin/login" className="flex items-center" title="Admin Login">
               <img src="/bookgif.gif" alt="Animated Book" className="w-10 h-10 xl:w-12 xl:h-12 hover:scale-110 transition-transform cursor-pointer" style={{ imageRendering: 'pixelated' }} />
             </Link>
-          </nav>
+          </div>
+
+          {/* Mobile Nav Menu */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="absolute top-full left-0 right-0 bg-[#1a0f30]/95 backdrop-blur-md border-b border-[#ff5ea6]/30 p-6 flex flex-col items-center gap-6 font-vt323 text-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-40 md:hidden"
+              >
+                <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Home</Link>
+                <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">About</a>
+                <Link to="/events" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Events</Link>
+                <a href="#team" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Team</a>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </header>
 
         {/* Main Content */}
@@ -175,10 +316,10 @@ export default function HomePage() {
 
             {/* Action Buttons using individual images */}
             <div className="flex flex-wrap gap-4 justify-center w-full">
-              <a href="#events" className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform">
+              <Link to="/events" className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform">
                 <img src="/pink.webp" alt="Pink button bg" className="w-[160px] md:w-[200px] xl:w-[240px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
                 <span className="absolute font-silkscreen text-black text-sm xl:text-lg pb-1.5 md:pb-2 pointer-events-none uppercase">EXPLORE EVENTS</span>
-              </a>
+              </Link>
 
               <a href="#team" className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform">
                 <img src="/purple.webp" alt="Purple button bg" className="w-[160px] md:w-[200px] xl:w-[240px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
@@ -356,7 +497,7 @@ export default function HomePage() {
           <img src="/parchment.webp" alt="Parchment Board" className="w-full h-[650px] md:h-[750px] xl:h-auto object-fill xl:object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]" style={{ imageRendering: 'pixelated' }} />
 
           {/* --- Content inside parchment (Mobile & iPad) --- */}
-          <div 
+          <div
             className="absolute top-[22%] bottom-[25%] left-[17%] right-[17%] overflow-hidden pointer-events-auto xl:hidden"
             onTouchStart={(e) => {
               window.touchStartX = e.changedTouches[0].screenX;
@@ -367,16 +508,16 @@ export default function HomePage() {
               if (window.touchStartX - touchEndX < -50) handlePrevEvent(); // Swipe right
             }}
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key={currentEventIndex}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="flex flex-col items-center justify-start gap-3 md:gap-6 w-full h-full overflow-y-auto custom-scrollbar pb-4 pt-2"
+                className="absolute inset-0 flex flex-col items-center justify-start gap-3 md:gap-6 w-full h-full overflow-y-auto custom-scrollbar pb-4 pt-2"
               >
-                
+
                 {/* Left Column: Title & Image */}
                 <div className="flex flex-col items-center flex-1 max-w-md w-full shrink-0">
                   <h3 className="font-pixelify text-2xl md:text-5xl text-[#3b2d1d] drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)] mb-2 text-center pb-1">
@@ -405,13 +546,15 @@ export default function HomePage() {
                   </div>
 
                   {/* Pagination Arrows */}
-                  <div className="flex flex-col items-center w-full mt-4">
-                    <div className="flex justify-center gap-2">
-                      <img onClick={handlePrevEvent} src="/arrow_0.webp" alt="Previous Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
-                      <img onClick={handleNextEvent} src="/arrow_1.webp" alt="Next Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                  {featuredEvents.length > 1 && (
+                    <div className="flex flex-col items-center w-full mt-4">
+                      <div className="flex justify-center gap-2">
+                        <img onClick={handlePrevEvent} src="/arrow_0.webp" alt="Previous Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                        <img onClick={handleNextEvent} src="/arrow_1.webp" alt="Next Event" className="h-10 md:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                      </div>
+                      <span className="font-vt323 text-xs md:text-lg text-[#3b2d1d]/60 mt-1 uppercase tracking-wider">Swipe or click</span>
                     </div>
-                    <span className="font-vt323 text-xs md:text-lg text-[#3b2d1d]/60 mt-1 uppercase tracking-wider">Swipe or click</span>
-                  </div>
+                  )}
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -419,47 +562,58 @@ export default function HomePage() {
 
           {/* --- Content inside parchment (Laptop Only) --- */}
           <div className="hidden xl:block absolute inset-0 pointer-events-auto overflow-hidden">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key={currentEventIndex}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="flex flex-row items-center justify-center gap-6 2xl:gap-12 px-[22%] 2xl:px-[18%] pt-[12%] 2xl:pt-[10%] pb-[5%] w-full h-full"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 2xl:gap-4 px-[24%] 2xl:px-[18%] pb-[1%] w-full h-full"
               >
-                
-                {/* Left Column: Title & Image */}
-                <div className="flex flex-col items-center flex-1 max-w-sm 2xl:max-w-md w-full">
-                  <h3 className="font-pixelify text-5xl 2xl:text-6xl text-[#3b2d1d] drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)] mb-2 2xl:mb-4 -mt-16 2xl:-mt-20 pb-2 text-center">
+
+                {/* Title spanning full width */}
+                <div className="flex items-center justify-center w-full h-[5rem] 2xl:h-[5.5rem] shrink-0">
+                  <h3 className="font-pixelify text-4xl 2xl:text-5xl text-[#3b2d1d] drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)] text-center w-full">
                     {currentEvent.title}
                   </h3>
-                  <div className="w-full rounded-xl overflow-hidden border-[4px] border-[#3b2d1d] shadow-[4px_4px_0_rgba(59,45,29,0.8)]">
-                    <img src={currentEvent.image_url || currentEvent.image || "/eventplaceholder.webp"} alt={currentEvent.title} className="w-full h-auto object-cover" />
-                  </div>
                 </div>
 
-                {/* Right Column: Description & Details */}
-                <div className="flex flex-col flex-1 text-[#3b2d1d] items-start -mt-2 2xl:-mt-6">
-                  <div className="bg-[#3b2d1d]/5 rounded-xl p-4 2xl:p-6 border-2 border-[#3b2d1d]/20 mb-4 2xl:mb-6 w-full shadow-inner max-h-[20rem] 2xl:max-h-[24rem] overflow-y-auto custom-scrollbar">
-                    <p className="font-vt323 text-2xl 2xl:text-2xl leading-snug text-left text-[#3b2d1d]/90 font-bold">
-                      {currentEvent.description}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-row gap-4 2xl:gap-8 font-vt323 text-2xl 2xl:text-3xl text-[#3b2d1d]/80 font-bold self-start w-full">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl 2xl:text-2xl drop-shadow-[1px_1px_0_rgba(255,255,255,0.5)]">🗓️</span> {currentEvent.date}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl 2xl:text-2xl drop-shadow-[1px_1px_0_rgba(255,255,255,0.5)]">📍</span> {currentEvent.location}
+                {/* Image and Description Side-by-Side */}
+                <div className="flex flex-row gap-6 2xl:gap-12 w-full items-start mt-2">
+                  {/* Left Column: Image */}
+                  <div className="w-[45%] flex justify-center h-[20rem] 2xl:h-[24rem] shrink-0">
+                    <div className="w-full h-full rounded-xl overflow-hidden border-[4px] border-[#3b2d1d] shadow-[4px_4px_0_rgba(59,45,29,0.8)]">
+                      <img src={currentEvent.image_url || currentEvent.image || "/eventplaceholder.webp"} alt={currentEvent.title} className="w-full h-full object-cover" />
                     </div>
                   </div>
 
-                  {/* Pagination Arrows */}
-                  <div className="flex justify-end w-full mt-4 gap-0 pr-12 2xl:pr-0">
-                    <img onClick={handlePrevEvent} src="/arrow_0.webp" alt="Previous Event" className="h-12 2xl:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
-                    <img onClick={handleNextEvent} src="/arrow_1.webp" alt="Next Event" className="h-12 2xl:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                  {/* Right Column: Description & Details */}
+                  <div className="w-[51%] flex flex-col text-[#3b2d1d] items-start h-[20rem] 2xl:h-[26rem] justify-between shrink-0">
+                    <div className="bg-[#3b2d1d]/5 rounded-xl p-4 2xl:p-6 border-2 border-[#3b2d1d]/20 w-full shadow-inner flex-1 overflow-y-auto custom-scrollbar mb-4 2xl:mb-6">
+                      <p className="font-vt323 text-2xl 2xl:text-2xl leading-snug text-left text-[#3b2d1d]/90 font-bold">
+                        {currentEvent.description}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col w-full shrink-0">
+                      <div className="flex flex-row gap-4 2xl:gap-8 font-vt323 text-2xl 2xl:text-3xl text-[#3b2d1d]/80 font-bold self-start w-full">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl 2xl:text-2xl drop-shadow-[1px_1px_0_rgba(255,255,255,0.5)]">🗓️</span> {currentEvent.date}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl 2xl:text-2xl drop-shadow-[1px_1px_0_rgba(255,255,255,0.5)]">📍</span> {currentEvent.location}
+                        </div>
+                      </div>
+
+                      {/* Pagination Arrows */}
+                      {featuredEvents.length > 1 && (
+                        <div className="flex justify-end w-full mt-2 gap-0 pr-8 2xl:pr-0">
+                          <img onClick={handlePrevEvent} src="/arrow_0.webp" alt="Previous Event" className="h-12 2xl:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                          <img onClick={handleNextEvent} src="/arrow_1.webp" alt="Next Event" className="h-12 2xl:h-16 w-auto cursor-pointer hover:scale-110 active:scale-95 transition-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.2)]" style={{ imageRendering: 'pixelated' }} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -486,111 +640,214 @@ export default function HomePage() {
 
         {/* Action Button */}
         <div className="z-30 -mt-[6.5rem] md:-mt-32 xl:-mt-24 mb-4 xl:mb-8 flex flex-col items-center -rotate-[3deg]">
-          <div className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200">
+          <Link to="/events" className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200">
             <img src="/viewquest.webp" alt="View Quests Button" className="w-[200px] md:w-[300px] xl:w-[360px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
-          </div>
+          </Link>
           <p className="font-vt323 text-lg md:text-3xl xl:text-4xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)] text-center pl-2 xl:pl-6 -mt-2 xl:-mt-6">
             Assemble Your Party.
           </p>
         </div>
-
+        
       </div>
 
       {/* --- PAGE 4: MEET THE TEAM --- */}
-      <div id="team" className="min-h-screen flex flex-col relative overflow-hidden items-center justify-start text-center pt-24 md:pt-32 px-4 pb-12 z-20 -mt-[6rem] sm:-mt-[12rem] md:portrait:-mt-[20rem] lg:landscape:-mt-[5rem] xl:mt-0">
-        
+      <div id="team" className="flex flex-col relative overflow-hidden items-center justify-start text-center pt-24 md:pt-32 px-4 pb-12 z-20 -mt-[2rem] sm:-mt-[12rem] md:portrait:-mt-[20rem] lg:landscape:-mt-[5rem] xl:mt-0">
+
         {/* Background Overlay */}
         <div className="absolute inset-0 pointer-events-none z-0"></div>
-        
+
         <div className="z-10 w-full max-w-7xl mx-auto flex flex-col items-center">
+        
+          {/* --- MENTORS OF THE GUILD --- */}
+          {facultyMembers && facultyMembers.length > 0 && (
+            <div className="mb-20 md:mb-24 flex flex-col items-center w-full">
+              <h2 className="font-pixelify text-4xl md:text-5xl xl:text-6xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] mb-8 md:mb-12 text-center uppercase tracking-wider leading-snug">
+                Mentors of <br className="md:hidden" /><span className="text-[#ff5ea6]">The Guild</span>
+              </h2>
+              <div className="w-full flex justify-center rotate-[-3deg] transition-transform duration-500 scale-105 pr-2 md:pr-0">
+                <div className="grid grid-cols-2 md:flex md:flex-wrap md:justify-center max-w-5xl gap-x-2 gap-y-12 md:gap-8 p-0">
+                  {facultyMembers.map((member, idx) => (
+                    <div
+                      key={idx}
+                      className="relative flex flex-col items-center group cursor-pointer hover:scale-125 hover:z-50 transition-all duration-300"
+                      onClick={() => setSelectedMember(member)}
+                    >
+                      <div className="relative w-40 h-40 md:w-56 md:h-56">
+                        <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                        <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center bg-black/40">
+                          <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                      <div className="text-center mt-3 rotate-[3deg] w-42 sm:w-44 md:w-64">
+                        <h4 className="font-pixelify text-lg sm:text-xl md:text-3xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                        <p className="font-vt323 text-base sm:text-lg md:text-2xl text-[#ff8cbe] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] mt-1 leading-tight">{member.position}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <h2 className="font-pixelify text-4xl md:text-5xl xl:text-6xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] mb-10 md:mb-16 text-center uppercase tracking-wider">
             Meet <span className="text-[#ff5ea6]">The Guild</span>
           </h2>
-          
+
           {/* Angled Core Section */}
-          <div className="w-full flex justify-center mb-16 md:mb-24 rotate-[-4deg] transition-transform duration-500 scale-105">
-            <div className="flex justify-center flex-wrap max-w-5xl gap-1 md:gap-2 p-0">
+          <div className="w-full flex justify-center mb-28 md:mb-24 rotate-[-3deg] transition-transform duration-500 scale-105 pr-2 md:pr-0">
+            <div className="grid grid-cols-2 md:flex md:flex-wrap md:justify-center max-w-5xl gap-x-2 gap-y-12 md:gap-8 p-0">
               {coreMembers.map((member, idx) => (
-                <div key={idx} className="relative flex flex-col items-center group cursor-pointer hover:scale-125 hover:z-50 transition-all duration-300 mx-2 md:mx-4">
+                <div
+                  key={idx}
+                  className="relative flex flex-col items-center group cursor-pointer hover:scale-125 hover:z-50 transition-all duration-300"
+                  onClick={() => setSelectedMember(member)}
+                >
                   <div className="relative w-40 h-40 md:w-56 md:h-56">
                     <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
                     <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
                       <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
                     </div>
                   </div>
-                  <div className="text-center mt-2 rotate-[4deg]">
-                    <h4 className="font-pixelify text-xl md:text-3xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] whitespace-nowrap">{member.name}</h4>
-                    <p className="font-vt323 text-lg md:text-2xl text-[#ff8cbe] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] mt-0">{member.position}</p>
+                  <div className="text-center mt-3 rotate-[3deg] w-42 sm:w-44 md:w-64">
+                    <h4 className="font-pixelify text-lg sm:text-xl md:text-3xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                    <p className="font-vt323 text-base sm:text-lg md:text-2xl text-[#ff8cbe] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] mt-1 leading-tight">{member.position}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <h3 className="font-pixelify text-3xl md:text-5xl text-white mb-8 md:mb-12 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] uppercase">
+          <h3 className="font-pixelify text-3xl md:text-5xl text-white mb-2 md:mb-4 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] uppercase">
             Party Members
           </h3>
+          <p className="font-vt323 text-lg md:text-2xl text-[#ff8cbe] drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)] mb-8 md:mb-12 animate-pulse cursor-default">
+            Click to inspect member stats!
+          </p>
 
           {/* Marquee Subcore Section */}
-          <div className="w-[120vw] relative rotate-[-4deg] flex flex-col items-center scale-105 mb-16">
-            
-            {/* Row 1 Marquee */}
-            <div className="marquee-track relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 50s linear infinite" }}>
-              {[...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4)].map((member, idx) => (
-                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
-                  <div className="relative w-28 h-28 md:w-44 md:h-44">
-                    <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
-                    <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
-                      <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+          <div className="w-[110vw] md:w-[120vw] relative rotate-[-4deg] flex flex-col items-center scale-105 mb-0 pb-28 lg:pb-36 overflow-hidden">
+
+            {/* ---- MOBILE VIEW (3 Rows) ---- */}
+            <div className="flex md:hidden flex-col items-center w-full mt-4">
+              {/* Mobile Row 1 */}
+              <div data-speed="0.3" className="mobile-marquee marquee-track relative z-10 hover:z-50 flex flex-nowrap w-full hover:[animation-play-state:paused] mb-3 pb-4 px-10">
+                {[...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4), ...subcoreMembers.slice(0, 4)].map((member, idx) => (
+                  <div
+                    key={idx}
+                    className="relative inline-flex flex-col items-center group cursor-pointer mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300"
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    <div className="relative w-32 h-32">
+                      <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                      <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
+                        <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="text-center mt-2 opacity-100 z-10 w-36 flex flex-col justify-center min-h-[4rem]">
+                      <h4 className="font-pixelify text-lg text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                      <p className="font-vt323 text-base text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-tight">{member.position}</p>
                     </div>
                   </div>
-                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
-                    <h4 className="font-pixelify text-base md:text-2xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{member.name}</h4>
-                    <p className="font-vt323 text-sm md:text-xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-none">{member.position}</p>
+                ))}
+              </div>
+
+              {/* Mobile Row 2 */}
+              <div data-speed="-0.3" className="mobile-marquee marquee-track relative z-10 hover:z-50 flex flex-nowrap w-full hover:[animation-play-state:paused] mb-3 pb-4 px-10">
+                {[...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8)].map((member, idx) => (
+                  <div
+                    key={idx}
+                    className="relative inline-flex flex-col items-center group cursor-pointer mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300"
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    <div className="relative w-32 h-32">
+                      <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                      <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
+                        <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="text-center mt-2 opacity-100 z-10 w-36 flex flex-col justify-center min-h-[4rem]">
+                      <h4 className="font-pixelify text-lg text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                      <p className="font-vt323 text-base text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-tight">{member.position}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              {/* Mobile Row 3 */}
+              <div data-speed="0.4" className="mobile-marquee marquee-track relative z-10 hover:z-50 flex flex-nowrap w-full hover:[animation-play-state:paused] pb-4 px-10">
+                {[...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12)].map((member, idx) => (
+                  <div
+                    key={idx}
+                    className="relative inline-flex flex-col items-center group cursor-pointer mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300"
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    <div className="relative w-32 h-32">
+                      <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                      <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
+                        <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="text-center mt-2 opacity-100 z-10 w-36 flex flex-col justify-center min-h-[4rem]">
+                      <h4 className="font-pixelify text-lg text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                      <p className="font-vt323 text-base text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-tight">{member.position}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Row 2 Marquee (Reverse direction) */}
-            <div className="marquee-track relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused] mb-1 md:mb-2" style={{ animation: "marquee 45s linear infinite reverse" }}>
-              {[...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8), ...subcoreMembers.slice(4, 8)].map((member, idx) => (
-                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
-                  <div className="relative w-28 h-28 md:w-44 md:h-44">
-                    <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
-                    <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
-                      <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+            {/* ---- DESKTOP/TABLET VIEW (2 Rows) ---- */}
+            <div className="hidden md:flex flex-col items-center w-full mt-8 lg:mt-16">
+              {/* Desktop Row 1 */}
+              <div className="marquee-track relative z-10 hover:z-50 flex flex-nowrap w-fit hover:[animation-play-state:paused] mb-8 lg:mb-12" style={{ animation: "marquee 120s linear infinite" }}>
+                {[...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6), ...subcoreMembers.slice(0, 6)].map((member, idx) => (
+                  <div
+                    key={idx}
+                    className="relative inline-flex flex-col items-center group cursor-pointer mx-4 lg:mx-8 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300"
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    <div className="relative w-48 h-48 lg:w-56 lg:h-56">
+                      <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                      <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
+                        <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full -mt-2 lg:-mt-4 z-10 w-64 lg:w-80 flex flex-col items-center justify-start min-h-[4rem]">
+                      <h4 className="font-pixelify text-2xl lg:text-3xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                      <p className="font-vt323 text-xl lg:text-2xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-tight -mt-1 lg:-mt-2">{member.position}</p>
                     </div>
                   </div>
-                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
-                    <h4 className="font-pixelify text-base md:text-2xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{member.name}</h4>
-                    <p className="font-vt323 text-sm md:text-xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-none">{member.position}</p>
+                ))}
+              </div>
+
+              {/* Desktop Row 2 */}
+              <div className="marquee-track relative z-10 hover:z-50 flex flex-nowrap w-fit hover:[animation-play-state:paused]" style={{ animation: "marquee 110s linear infinite reverse" }}>
+                {[...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12), ...subcoreMembers.slice(6, 12)].map((member, idx) => (
+                  <div
+                    key={idx}
+                    className="relative inline-flex flex-col items-center group cursor-pointer mx-4 lg:mx-8 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300"
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    <div className="relative w-48 h-48 lg:w-56 lg:h-56">
+                      <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                      <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
+                        <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full -mt-2 lg:-mt-4 z-10 w-64 lg:w-80 flex flex-col items-center justify-start min-h-[4rem]">
+                      <h4 className="font-pixelify text-2xl lg:text-3xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] leading-tight">{member.name}</h4>
+                      <p className="font-vt323 text-xl lg:text-2xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-tight -mt-1 lg:-mt-2">{member.position}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Row 3 Marquee */}
-            <div className="marquee-track relative z-10 hover:z-50 flex whitespace-nowrap w-fit hover:[animation-play-state:paused]" style={{ animation: "marquee 55s linear infinite" }}>
-              {[...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12), ...subcoreMembers.slice(8, 12)].map((member, idx) => (
-                <div key={idx} className="relative inline-flex flex-col items-center group cursor-pointer mx-1 md:mx-2 shrink-0 hover:scale-125 hover:z-50 transition-all duration-300">
-                  <div className="relative w-28 h-28 md:w-44 md:h-44">
-                    <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
-                    <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
-                      <img src={member.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${member.name}`} alt={member.name} className="w-full h-full object-cover" />
-                    </div>
-                  </div>
-                  <div className="text-center mt-1 md:mt-2 rotate-[4deg] opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 absolute -bottom-8 md:-bottom-12 z-10">
-                    <h4 className="font-pixelify text-base md:text-2xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{member.name}</h4>
-                    <p className="font-vt323 text-sm md:text-xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] leading-none">{member.position}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
           </div>
-          
+
         </div>
+
+
       </div>
 
       {/* --- PAGE 5: FOOTER SECTION --- */}
@@ -735,6 +992,47 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Member Popup Modal */}
+      <AnimatePresence>
+        {selectedMember && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99999] bg-black/80 flex items-center justify-center p-4"
+            onClick={() => setSelectedMember(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 50 }}
+              className="bg-[#080315] border-4 border-[#ff5ea6] p-6 md:p-8 rounded-xl relative max-w-sm md:max-w-md w-full flex flex-col items-center shadow-[0_0_30px_rgba(255,94,166,0.5)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="absolute top-2 right-4 text-[#ff8cbe] hover:text-white font-pixelify text-3xl transition-colors"
+                onClick={() => setSelectedMember(null)}
+              >
+                ×
+              </button>
+
+              <div className="relative w-72 h-72 sm:w-[22rem] sm:h-[22rem] mb-6 mt-4">
+                <img src="/character_grid.webp" alt="Grid Tile" className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                <div className="absolute inset-[6%] rounded-lg overflow-hidden flex items-center justify-center">
+                  <img src={selectedMember.image_url || `https://api.dicebear.com/9.x/pixel-art/svg?seed=${selectedMember.name}`} alt={selectedMember.name} className="w-full h-full object-cover" />
+                </div>
+              </div>
+
+              <h4 className="font-pixelify text-3xl sm:text-4xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,1)] text-center leading-tight mb-2">
+                {selectedMember.name}
+              </h4>
+              <p className="font-vt323 text-2xl sm:text-3xl text-[#ff5ea6] drop-shadow-[1px_1px_0_rgba(0,0,0,1)] text-center leading-tight">
+                {selectedMember.position}
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

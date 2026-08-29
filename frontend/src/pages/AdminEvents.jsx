@@ -13,7 +13,8 @@ export default function AdminEvents() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [deleteModalId, setDeleteModalId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -60,6 +61,14 @@ export default function AdminEvents() {
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Enforce 5MB file size limit to match backend configuration
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB. Please choose a smaller image.');
+        e.target.value = null; // Clear the input
+        return;
+      }
+
       setSelectedFile(file);
       setPreviewImage(URL.createObjectURL(file));
     }
@@ -125,16 +134,23 @@ export default function AdminEvents() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) return;
-    
+  const handleDelete = (id) => {
+    setDeleteModalId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteModalId) return;
+    setIsDeleting(true);
     try {
-      const res = await fetchWithAuth(`/events/${id}`, { method: 'DELETE' });
+      const res = await fetchWithAuth(`/events/${deleteModalId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       loadData();
     } catch (err) {
       console.error(err);
       alert('Failed to delete');
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalId(null);
     }
   };
 
@@ -391,6 +407,32 @@ export default function AdminEvents() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {deleteModalId && (
+        <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-[#1a0f30] border-4 border-red-500 rounded-xl p-6 md:p-8 max-w-lg w-full relative shadow-[8px_8px_0_rgba(0,0,0,0.8)] text-center">
+            <h2 className="font-pixelify text-3xl text-red-400 mb-4 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">Delete Event?</h2>
+            <p className="font-vt323 text-2xl text-white mb-8">Are you sure you want to delete this event? This action cannot be undone and will permanently remove it from the guild logs.</p>
+            
+            <div className="flex justify-center gap-6 font-vt323 text-xl">
+              <button 
+                onClick={() => setDeleteModalId(null)}
+                disabled={isDeleting}
+                className="px-6 py-2 rounded bg-gray-600 hover:bg-gray-500 text-white font-bold transition-colors shadow-[2px_2px_0_rgba(0,0,0,0.8)] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={executeDelete}
+                disabled={isDeleting}
+                className="px-6 py-2 rounded bg-red-500 hover:bg-red-400 text-black font-bold transition-colors shadow-[2px_2px_0_rgba(0,0,0,0.8)] disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
