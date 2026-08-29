@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import SplitText from '../components/SplitText';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchTeam, fetchFeaturedEvents } from '../utils/api';
 import { Menu, X } from 'lucide-react';
 
@@ -14,6 +14,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -251,6 +252,7 @@ export default function HomePage() {
               <a href="#about" className="hover:underline underline-offset-4 decoration-2">About</a>
               <Link to="/events" className="hover:underline underline-offset-4 decoration-2">Events</Link>
               <a href="#team" className="hover:underline underline-offset-4 decoration-2">Team</a>
+              <Link to="/games" className="hover:underline underline-offset-4 decoration-2 text-[#a8a0ff] hover:text-[#ff5ea6] drop-shadow-[0_0_5px_rgba(168,160,255,0.5)]">Games</Link>
             </nav>
 
             {/* Mobile Nav Toggle */}
@@ -280,6 +282,7 @@ export default function HomePage() {
                 <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">About</a>
                 <Link to="/events" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Events</Link>
                 <a href="#team" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Team</a>
+                <Link to="/games" onClick={() => setIsMobileMenuOpen(false)} className="text-[#a8a0ff] hover:text-[#ff5ea6]">Games</Link>
               </motion.div>
             )}
           </AnimatePresence>
@@ -330,9 +333,9 @@ export default function HomePage() {
         </main>
 
         {/* Boombox on Left of Footer */}
-        <img src="/boombox.webp" alt="Boombox" className="absolute left-2 xl:left-5 bottom-[2.9rem] md:bottom-[2.6rem] lg:landscape:bottom-[2.3rem] xl:landscape:bottom-[3.8rem] 2xl:landscape:bottom-[3.3rem] w-20 md:w-32 xl:w-52 -rotate-[1.5deg] z-30 pointer-events-none origin-bottom" style={{ imageRendering: 'pixelated' }} />
+        <img src="/boombox.webp" alt="Boombox" onClick={() => navigate('/games/pacman')} className="absolute left-2 xl:left-5 bottom-[2.9rem] md:bottom-[2.6rem] lg:landscape:bottom-[2.3rem] xl:landscape:bottom-[3.8rem] 2xl:landscape:bottom-[3.3rem] w-20 md:w-32 xl:w-52 -rotate-[1.5deg] z-30 cursor-pointer origin-bottom hover:scale-105 hover:brightness-125 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all" style={{ imageRendering: 'pixelated' }} />
         {/* Gengar Standing on Footer */}
-        <img src="/gengar.webp" alt="Gengar" className="absolute right-2 xl:right-6 bottom-[3.2rem] md:bottom-[3.4rem] lg:landscape:bottom-[3.6rem] xl:landscape:bottom-[5.2rem] 2xl:landscape:bottom-[5.7rem] w-20 md:w-32 xl:w-48 -rotate-[5.5deg] z-30 pointer-events-none origin-bottom" style={{ imageRendering: 'pixelated' }} />
+        <img src="/gengar.webp" alt="Gengar" onClick={() => navigate('/games/reaction')} className="absolute right-2 xl:right-6 bottom-[3.2rem] md:bottom-[3.4rem] lg:landscape:bottom-[3.6rem] xl:landscape:bottom-[5.2rem] 2xl:landscape:bottom-[5.7rem] w-20 md:w-32 xl:w-48 -rotate-[5.5deg] z-30 cursor-pointer origin-bottom hover:scale-105 hover:brightness-125 hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all" style={{ imageRendering: 'pixelated' }} />
 
         {/* Tilted Footer Ticker */}
         <footer className="absolute bottom-2 md:bottom-3 xl:bottom-7 -left-4 w-[110vw] -rotate-[1.5deg] bg-[#1a0f30] border-y-2 border-[#ff8cbe] py-2 xl:py-3 overflow-hidden whitespace-nowrap z-20 font-vt323 text-base xl:text-lg text-gray-300 shadow-[0_0_20px_rgba(0,0,0,0.5)]">

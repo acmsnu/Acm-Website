@@ -43,6 +43,7 @@ router.use('/uploads', express.static(uploadDir));
 router.use('/api/auth', require('./routes/auth'));
 router.use('/api/team', require('./routes/team'));
 router.use('/api/events', require('./routes/events'));
+router.use('/api/leaderboard', require('./routes/leaderboard'));
 
 // Health check route
 router.get('/api/health', (req, res) => {

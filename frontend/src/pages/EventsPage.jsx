@@ -156,9 +156,8 @@ export default function EventsPage() {
               {/* Desktop Nav Links */}
               <nav className="hidden md:flex items-center gap-4 xl:gap-6 font-vt323 text-xl md:text-2xl xl:tracking-wider">
                 <Link to="/" className="hover:underline underline-offset-4 decoration-2">Home</Link>
-                <Link to="/#about" className="hover:underline underline-offset-4 decoration-2">About</Link>
                 <Link to="/events" className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Events</Link>
-                <Link to="/#team" className="hover:underline underline-offset-4 decoration-2">Team</Link>
+                <Link to="/games" className="hover:underline underline-offset-4 decoration-2 text-[#a8a0ff] hover:text-[#ff5ea6] drop-shadow-[0_0_5px_rgba(168,160,255,0.5)]">Games</Link>
               </nav>
 
               {/* Mobile Nav Toggle */}
@@ -187,9 +186,8 @@ export default function EventsPage() {
               className="absolute top-full left-0 right-0 bg-[#1a0f30]/95 backdrop-blur-md border-b border-[#ff5ea6]/30 p-6 flex flex-col items-center gap-6 font-vt323 text-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-40 md:hidden"
             >
               <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Home</Link>
-              <Link to="/#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">About</Link>
               <Link to="/events" onClick={() => setIsMobileMenuOpen(false)} className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Events</Link>
-              <Link to="/#team" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Team</Link>
+              <Link to="/games" onClick={() => setIsMobileMenuOpen(false)} className="text-[#a8a0ff] hover:text-[#ff5ea6]">Games</Link>
             </motion.div>
           )}
         </AnimatePresence>
