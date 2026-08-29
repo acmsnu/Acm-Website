@@ -72,28 +72,29 @@ const ReactionGame = () => {
 
   // Save score to leaderboard
   const saveScore = useCallback(async (time) => {
-    let finalUsername = username.trim()
+    const finalUsername = username.trim()
+    
+    // Don't submit to public leaderboard if no username is provided
     if (!finalUsername) {
-      finalUsername = `Player${Math.floor(Math.random() * 1000)}`
-      saveUsername(finalUsername)
-    }
+      console.log('No username provided, score not submitted to public leaderboard')
+    } else {
+      try {
+        const playerId = getPlayerId()
 
-    try {
-      const playerId = getPlayerId()
-
-      await fetch(`${API_BASE_URL}/leaderboard`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          player_id: playerId,
-          nickname: finalUsername,
-          game: 'reaction',
-          score: time,
-          difficulty: difficulty
+        await fetch(`${API_BASE_URL}/leaderboard`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            player_id: playerId,
+            nickname: finalUsername,
+            game: 'reaction',
+            score: time,
+            difficulty: difficulty
+          })
         })
-      })
-    } catch (error) {
-      console.error('Failed to submit score:', error)
+      } catch (error) {
+        console.error('Failed to submit score:', error)
+      }
     }
 
     // Keep local best time functionality
@@ -269,7 +270,7 @@ const ReactionGame = () => {
     if (countdown > 0 && gameState === 'waiting') return `Starting in ${countdown}...`
     if (gameState === 'idle') return 'Press "Start Game" to begin'
     if (gameState === 'waiting') return 'Wait for green...'
-    if (gameState === 'ready') return 'PRESS SPACEBAR NOW!'
+    if (gameState === 'ready') return 'TAP OR PRESS SPACEBAR NOW!'
     if (gameState === 'results') return `Average: ${reactionTime}ms`
     return ''
   }
@@ -302,12 +303,12 @@ const ReactionGame = () => {
           <div className="max-w-4xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#2B7FFF] to-[#1E40AF] bg-clip-text text-transparent">
-                Reaction Time Game
-              </h1>
-              <div className="text-gray-400 text-lg">
-                Test your reflexes! Press SPACEBAR when the box turns green.
-              </div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#2B7FFF] to-[#1E40AF] bg-clip-text text-transparent">
+                  Reaction Time Game
+                </h1>
+                <div className="text-gray-400 text-lg">
+                  Test your reflexes! Tap the screen or press SPACEBAR when the box turns green.
+                </div>
             </div>
 
             {/* Username Input */}
@@ -355,7 +356,12 @@ const ReactionGame = () => {
 
             {/* Game Area */}
             <div
-              className="mb-4 rounded-xl overflow-hidden select-none transition-all duration-300"
+              className="mb-4 rounded-xl overflow-hidden select-none transition-all duration-300 cursor-pointer"
+              onClick={handleSpacePress}
+              onTouchStart={(e) => {
+                e.preventDefault() // Prevent double firing from touch + click
+                handleSpacePress()
+              }}
               style={{
                 backgroundColor: getBackgroundColor(),
                 minHeight: '250px',

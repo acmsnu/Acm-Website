@@ -52,14 +52,14 @@ router.get('/:game', async (req, res) => {
     // Reaction time: lowest score is best (ASC), Pac-Man: highest is best (DESC)
     const orderBy = game === 'reaction' ? 'ASC' : 'DESC';
 
-    // Get top 50 unique players for this game
-    // We use GROUP BY player_id to get only the best score per player
+    // Get top 50 unique names for this game
+    // We use GROUP BY nickname to get only the best score per name
     const query = `
-      SELECT player_id, MAX(nickname) as nickname, game, difficulty,
+      SELECT MAX(player_id) as player_id, nickname, game, difficulty,
              ${game === 'reaction' ? 'MIN(score)' : 'MAX(score)'} as best_score
       FROM game_scores
       WHERE game = ?
-      GROUP BY player_id, game, difficulty
+      GROUP BY nickname, game, difficulty
       ORDER BY best_score ${orderBy}
       LIMIT 50
     `;

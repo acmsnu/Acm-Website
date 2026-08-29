@@ -12,9 +12,9 @@ const BOARD_WIDTH = 19
 const BOARD_HEIGHT = 21
 const CANVAS_WIDTH = BOARD_WIDTH * CELL_SIZE
 const CANVAS_HEIGHT = BOARD_HEIGHT * CELL_SIZE
-const INITIAL_GAME_SPEED = 15 // Slowed down from 6 to 12 frames per move for human reaction times
+const INITIAL_GAME_SPEED = 7
 const MIN_GAME_SPEED = 2 // Minimum speed (move every 2 frames - faster)
-const SPEED_INCREASE_INTERVAL = 1000 // Increase speed every 1000 points (slower progression)
+const SPEED_INCREASE_INTERVAL = 750 // Increase speed every 1000 points (slower progression)
 // GHOST_SPEED is now calculated dynamically based on Pac-Man's speed
 const MOUTH_ANIMATION_SPEED = 12 // Mouth animation every 12 frames (slower than movement)
 
@@ -111,8 +111,6 @@ const PacManGame = () => {
   const [pacmanDead, setPacmanDead] = useState(false)
   const [mouthOpen, setMouthOpen] = useState(true)
   const [deathAnimation, setDeathAnimation] = useState(false)
-  const [powerMode, setPowerMode] = useState(false)
-  const [powerTimer, setPowerTimer] = useState(0)
   const [hiddenLevelUnlocked, setHiddenLevelUnlocked] = useState(false)
   const [showUnlockPopup, setShowUnlockPopup] = useState(false)
   const [isHiddenLevel, setIsHiddenLevel] = useState(false)
@@ -120,11 +118,7 @@ const PacManGame = () => {
   const [bossActive, setBossActive] = useState(false)
   const [bossDefeated, setBossDefeated] = useState(false)
   const [bossHP, setBossHP] = useState(3)
-  const [bossRegenTimer, setBossRegenTimer] = useState(0)
   const [testModeEnabled, setTestModeEnabled] = useState(false)
-  const [bossParticles, setBossParticles] = useState([])
-  const [hitEffects, setHitEffects] = useState([])
-  const [deadGhosts, setDeadGhosts] = useState([])
   const [showPortalEffect, setShowPortalEffect] = useState(false)
   const [username, setUsername] = useState('')
   const [gameCount, setGameCount] = useState(0)
@@ -143,6 +137,15 @@ const PacManGame = () => {
   const bossRef = useRef({ x: 9, y: 19 })
   const animationRef = useRef(undefined)
   const frameCountRef = useRef(0)
+  const gameLoopRef = useRef(null)
+  const powerModeRef = useRef(false)
+  const powerTimerRef = useRef(0)
+  const hitEffectsRef = useRef([])
+  const deadGhostsRef = useRef([])
+  const bossParticlesRef = useRef([])
+  const bossRegenTimerRef = useRef(0)
+  const scoreRef = useRef(0)
+  useEffect(() => { scoreRef.current = score }, [score])
   const lastTimeRef = useRef(0)
   const pacmanAccumRef = useRef(0)
   const ghostAccumRef = useRef(0)
@@ -161,8 +164,16 @@ const PacManGame = () => {
   // Submit score to backend
   const submitScore = useCallback(async (finalScore) => {
     try {
+      const name = username.trim()
+      
+      // Don't submit to leaderboard if they didn't provide a username
+      // (It will still be saved to their personal best locally if implemented)
+      if (!name) {
+        console.log('No username provided, score not submitted to public leaderboard')
+        return
+      }
+      
       const playerId = getPlayerId()
-      const name = username.trim() || 'warrior'
       console.log('Submitting score:', finalScore, 'for', name)
 
       await fetch(`${API_BASE_URL}/leaderboard`, {
@@ -320,7 +331,7 @@ const PacManGame = () => {
       }
 
       // Draw boss particles
-      bossParticles.forEach(particle => {
+      bossParticlesRef.current.forEach(particle => {
         if (particle.active) {
           ctx.fillStyle = '#FF0000' // Red particles
           ctx.beginPath()
@@ -336,7 +347,7 @@ const PacManGame = () => {
       })
 
       // Draw hit effects
-      hitEffects.forEach(effect => {
+      hitEffectsRef.current.forEach(effect => {
         if (effect.timer > 0) {
           const alpha = effect.timer / 30 // Fade out over time
           const effectSize = 20 + (30 - effect.timer) * 2 // Grow effect
@@ -383,7 +394,7 @@ const PacManGame = () => {
     }
 
 
-  }, [deathAnimation, isHiddenLevel, hasSword, bossActive, bossDefeated, bossParticles, hitEffects])
+  }, [deathAnimation, isHiddenLevel, hasSword, bossActive, bossDefeated])
 
   // Draw Pac-Man
   const drawPacman = useCallback((ctx) => {
@@ -451,7 +462,7 @@ const PacManGame = () => {
       const y = ghost.y * CELL_SIZE
 
       // Skip drawing dead ghosts
-      const isDead = deadGhosts.some(dead => dead.index === index)
+      const isDead = deadGhostsRef.current.some(dead => dead.index === index)
       if (isDead) return
 
       // Draw shadow trail effect (ghost-shaped, not rectangular)
@@ -495,7 +506,16 @@ const PacManGame = () => {
       }
 
       // Main body
-      ctx.fillStyle = powerMode ? '#0000FF' : ghost.color
+      let currentGhostColor = ghost.color
+      if (powerModeRef.current) {
+        // Flicker white when power is running out (< 180 frames / 3 seconds)
+        if (powerTimerRef.current < 180 && Math.floor(powerTimerRef.current / 15) % 2 === 0) {
+          currentGhostColor = '#FFFFFF'
+        } else {
+          currentGhostColor = '#0000FF'
+        }
+      }
+      ctx.fillStyle = currentGhostColor
       ctx.beginPath()
 
       // Top rounded part
@@ -585,7 +605,7 @@ const PacManGame = () => {
         ctx.stroke()
       }
     })
-  }, [deathEffect, deadGhosts])
+  }, [deathEffect])
 
   // Check collision with wall
   const isWall = (x, y) => {
@@ -634,11 +654,12 @@ const PacManGame = () => {
       }
       // Eat power pellet
       else if (boardRef.current[newY][newX] === 3) {
-        boardRef.current[newY][newX] = 0
-        setScore(s => s + 50)
-        setPowerMode(true)
-        setPowerTimer(Math.max(60, 300 - ((level - 1) * 60))) // Scale down duration by 1s per level
-        setHitEffects(prev => [...prev, { x: pacman.x, y: pacman.y, text: 'POWER!' }])
+        boardRef.current[pacmanRef.current.y][pacmanRef.current.x] = 0 // Remove pellet
+        scoreRef.current += 50
+        setScore(prev => prev + 50)
+        powerModeRef.current = true
+        powerTimerRef.current = Math.max(60, 300 - ((level - 1) * 60)) // Scale down duration by 1s per level
+        hitEffectsRef.current.push({ x: pacman.x, y: pacman.y, text: 'POWER!', timer: 60 })
 
         // Check if this is the sword pellet in hidden level
         if (isHiddenLevel && !hasSword && newX === 8 && newY === 16) {
@@ -668,16 +689,17 @@ const PacManGame = () => {
           if (hasSword) {
             // Hit the boss with sword - reduce HP and teleport boss to safe location
             // Add boss hit effect
-            setHitEffects(prev => [...prev, {
-              x: boss.x,
-              y: boss.y,
-              type: 'boss',
-              timer: 20 // 20 frames = ~0.33 seconds
-            }])
+            hitEffectsRef.current.push({
+              x: boss.x, 
+              y: boss.y, 
+              text: 'BOSS UNLOCKED!',
+              timer: 120
+            })
+            
+            setBossHP(prev => prev - 1)
+            bossRegenTimerRef.current = 0
 
-            setBossHP(prev => {
-              const newHP = prev - 1
-              if (newHP <= 0) {
+            if (bossHP - 1 <= 0) {
                 // Boss defeated!
                 setBossDefeated(true)
                 setScore(prevScore => prevScore + 500) // Big bonus for defeating boss
@@ -687,7 +709,7 @@ const PacManGame = () => {
                 submitScore(score + 500)
               } else {
                 // Boss takes damage but survives - teleport to safe location
-                console.log(`Boss hit! HP: ${newHP}/3 - Teleporting to safe location`)
+                console.log(`Boss hit! HP: ${bossHP - 1}/3 - Teleporting to safe location`)
 
                 // Teleport boss to one of several safe locations
                 const safeLocations = [
@@ -709,8 +731,6 @@ const PacManGame = () => {
 
                 setScore(prevScore => prevScore + 50) // Small bonus for hitting boss
               }
-              return newHP
-            })
           } else {
             // Can't defeat boss without sword - take damage
             setDeathAnimation(true)
@@ -740,12 +760,12 @@ const PacManGame = () => {
           setShowPortalEffect(true)
 
           // Add portal effect
-          setHitEffects(prev => [...prev, {
-            x: portalX,
-            y: portalY,
-            type: 'portal',
-            timer: 60 // 60 frames = 1 second
-          }])
+          hitEffectsRef.current.push({
+            x: pacman.x, 
+            y: pacman.y, 
+            text: 'SWORD ACQUIRED!',
+            timer: 90
+          })
 
           // Show unlock popup instead of immediately teleporting
           setTimeout(() => {
@@ -884,7 +904,7 @@ const PacManGame = () => {
     ghostsRef.current.forEach((ghost, index) => {
       // Skip dead ghosts (only applies to hidden level)
       if (isHiddenLevel) {
-        const isDead = deadGhosts.some(dead => dead.index === index)
+        const isDead = deadGhostsRef.current.some(dead => dead.index === index)
         if (isDead) return
       }
 
@@ -892,21 +912,33 @@ const PacManGame = () => {
       if (ghost.x === pacman.x && ghost.y === pacman.y && !deathAnimation) {
         console.log(`👻 Collision detected! Ghost ${index} at (${ghost.x},${ghost.y}), Pac-Man at (${pacman.x},${pacman.y})`)
 
-        if (powerMode) {
+        if (powerModeRef.current) {
           // Eat ghost during power mode
           console.log(`👻 Ghost ${index} eaten!`)
           setScore(prevScore => prevScore + 200)
-          setHitEffects(prev => [...prev, { x: ghost.x, y: ghost.y, text: '+200', timer: 30 }])
+          hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: '+200', timer: 30 })
           // Respawn immediately at center
           ghost.x = 9
           ghost.y = 9
         } else if (isHiddenLevel && hasSword) {
           // Kill the ghost with sword (hidden level only)
           console.log(`⚔️ Ghost ${index} defeated by sword!`)
-          setDeadGhosts(prev => [...prev, {
+          hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: 'HIT!', timer: 60 })
+              
+          // Boss dies
+          if (bossHP - 1 <= 0) {
+            setBossDefeated(true)
+            setBossHP(0)
+            setScore(prev => prev + 5000)
+            hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: '5000', timer: 120 })
+          } else {
+            setBossHP(prev => prev - 1)
+          }
+
+          deadGhostsRef.current.push({
             index: index,
             respawnTime: frameCountRef.current + 900 // 15 seconds = 900 frames at 60fps
-          }])
+          })
           setScore(prevScore => prevScore + 200) // Bonus for killing ghost
         } else {
           // Normal ghost collision - lose life (both regular and hidden level without sword)
@@ -939,7 +971,7 @@ const PacManGame = () => {
 
       console.log('🎉 Hidden level victory!')
     }
-  }, [score, submitScore, deathAnimation, isHiddenLevel, hasSword, deadGhosts])
+  }, [score, submitScore, deathAnimation, isHiddenLevel, hasSword])
 
   // Handle death animation
   const updateDeathAnimation = useCallback(() => {
@@ -999,59 +1031,58 @@ const PacManGame = () => {
     // Boss attacks every 5 seconds (300 frames at 60fps)
     if (frameCountRef.current % 300 === 0) {
       // Spawn 8 particles in circular pattern
-      const particles = []
       for (let i = 0; i < 8; i++) {
         const angle = (i / 8) * 2 * Math.PI
         const speed = 0.5 // Particle movement speed
-        particles.push({
+        bossParticlesRef.current.push({
           x: boss.x,
           y: boss.y,
           dx: Math.cos(angle) * speed,
           dy: Math.sin(angle) * speed,
-          active: true
+          active: true,
+          color: '#FF0000'
         })
       }
-      setBossParticles(particles)
     }
   }, [bossActive, bossDefeated])
 
   // Update boss particles
   const updateBossParticles = useCallback(() => {
-    setBossParticles(prevParticles => {
+    if (bossParticlesRef.current.length === 0) return
+    
+    bossParticlesRef.current = bossParticlesRef.current.map(particle => {
       const pacman = pacmanRef.current
-      return prevParticles.map(particle => {
-        if (!particle.active) return particle
+      if (!particle.active) return particle
 
-        // Move particle
-        const newX = particle.x + particle.dx
-        const newY = particle.y + particle.dy
+      // Move particle
+      const newX = particle.x + particle.dx
+      const newY = particle.y + particle.dy
 
-        // Particles can pass through walls - no wall collision check
+      // Particles can pass through walls - no wall collision check
 
-        // Check Pac-Man collision
-        if (Math.floor(newX) === pacman.x && Math.floor(newY) === pacman.y && !deathAnimation) {
-          console.log('💥 Particle hit! Lost 1 life.')
-          // Hit Pac-Man - reduce life
-          setLives(prev => {
-            const newLives = prev - 1
-            if (newLives <= 0) {
-              setGameOver(true)
-              setIsPlaying(false)
-              submitScore(score)
-            }
-            return newLives
-          })
-          return { ...particle, active: false }
-        }
+      // Check Pac-Man collision
+      if (Math.floor(newX) === pacman.x && Math.floor(newY) === pacman.y && !deathAnimation) {
+        console.log('💥 Particle hit! Lost 1 life.')
+        // Hit Pac-Man - reduce life
+        setLives(prev => {
+          const newLives = prev - 1
+          if (newLives <= 0) {
+            setGameOver(true)
+            setIsPlaying(false)
+            submitScore(score)
+          }
+          return newLives
+        })
+        return { ...particle, active: false }
+      }
 
-        return {
-          ...particle,
-          x: newX,
-          y: newY
-        }
-      }).filter(particle => particle.active || Math.random() > 0.1) // Gradually remove inactive particles
-    })
-  }, [deathAnimation, score, submitScore])
+      return {
+        ...particle,
+        x: newX,
+        y: newY
+      }
+    }).filter(particle => particle.active || Math.random() > 0.1) // Gradually remove inactive particles
+  }, [deathAnimation, score, submitScore, isPlaying, gameOver])
 
   // Game loop
   const gameLoop = useCallback((timestamp) => {
@@ -1063,102 +1094,95 @@ const PacManGame = () => {
     const deltaTime = Math.min(timestamp - lastTimeRef.current, 100)
     lastTimeRef.current = timestamp
 
+    // Accumulate time for fixed timestep
     pacmanAccumRef.current += deltaTime
-    ghostAccumRef.current += deltaTime
-    effectsAccumRef.current += deltaTime
 
-    // We still increment frameCountRef for things that just need a long timer (like respawns/boss regen)
-    // 1 frame is roughly 16.67ms
-    frameCountRef.current += (deltaTime / 16.67)
+    // Fixed timestep of ~16.67ms (60 FPS logical tick rate)
+    const FIXED_TIME_STEP = 16.67
 
-    // Calculate current game speed based on score (gradually increases)
-    const currentGameSpeed = Math.max(MIN_GAME_SPEED, INITIAL_GAME_SPEED - Math.floor(score / SPEED_INCREASE_INTERVAL))
-    const pacmanThreshold = currentGameSpeed * 16.67
+    // Run game logic exactly 60 times per second, regardless of monitor refresh rate
+    while (pacmanAccumRef.current >= FIXED_TIME_STEP) {
+      frameCountRef.current++
 
-    if (deathAnimation) {
-      // Handle death animation movement
-      while (pacmanAccumRef.current >= pacmanThreshold) {
-        updateDeathAnimation()
-        pacmanAccumRef.current -= pacmanThreshold
-      }
-    } else {
-      // Normal gameplay - Pac-Man moves based on current speed
-      while (pacmanAccumRef.current >= pacmanThreshold) {
-        movePacman()
-        pacmanAccumRef.current -= pacmanThreshold
-      }
+      const currentGameSpeed = Math.max(MIN_GAME_SPEED, INITIAL_GAME_SPEED - Math.floor(scoreRef.current / SPEED_INCREASE_INTERVAL))
 
-      // Ghosts move at different speeds based on level
-      const currentGhostSpeed = isHiddenLevel ? Math.max(2, currentGameSpeed - 2) : currentGameSpeed + 2
-      const ghostThreshold = currentGhostSpeed * 16.67
-
-      while (ghostAccumRef.current >= ghostThreshold) {
-        moveGhosts()
-        if (isHiddenLevel) {
-          moveBoss()
+      if (deathAnimation) {
+        // Handle death animation movement
+        if (frameCountRef.current % currentGameSpeed === 0) {
+          updateDeathAnimation()
         }
-        ghostAccumRef.current -= ghostThreshold
-      }
+      } else {
+        // Normal gameplay - Pac-Man moves based on current speed
+        if (frameCountRef.current % currentGameSpeed === 0) {
+          movePacman()
+        }
 
-      // Update boss particles every frame (approx 60fps)
-      if (isHiddenLevel && bossActive && effectsAccumRef.current >= 16.67) {
-        updateBossParticles()
-      }
+        // Ghosts move at different speeds based on level
+        const currentGhostSpeed = isHiddenLevel ? Math.max(2, currentGameSpeed - 2) : currentGameSpeed + 2
+        if (frameCountRef.current % currentGhostSpeed === 0) {
+          moveGhosts()
+          if (isHiddenLevel) {
+            moveBoss()
+          }
+        }
 
-      // Process effects every ~16.67ms
-      if (effectsAccumRef.current >= 16.67) {
-        effectsAccumRef.current -= 16.67
-        if (effectsAccumRef.current > 33) effectsAccumRef.current = 33 // Prevent huge backlog
+        // Update boss particles every frame (approx 60fps)
+        if (isHiddenLevel && bossActive) {
+          updateBossParticles()
+        }
 
-        // Update hit effects
-        setHitEffects(prev => prev.map(effect => ({
-          ...effect,
-          timer: effect.timer - 1
-        })).filter(effect => effect.timer > 0))
+        // Process effects every frame (60fps)
+        if (hitEffectsRef.current.length > 0) {
+          hitEffectsRef.current = hitEffectsRef.current.map(effect => ({
+            ...effect,
+            timer: effect.timer - 1
+          })).filter(effect => effect.timer > 0)
+        }
 
         // Update power timer
-        if (powerMode) {
-          setPowerTimer(prev => {
-            if (prev <= 1) {
-              setPowerMode(false)
-              return 0
+        if (powerModeRef.current) {
+          if (powerTimerRef.current <= 1) {
+            powerModeRef.current = false
+            powerTimerRef.current = 0
+          } else {
+            powerTimerRef.current -= 1
+          }
+        }
+
+        // Respawn dead ghosts after 15 seconds (900 frames)
+        if (deadGhostsRef.current.length > 0) {
+          deadGhostsRef.current = deadGhostsRef.current.filter(deadGhost => {
+            if (frameCountRef.current >= deadGhost.respawnTime) {
+              console.log(`👻 Ghost ${deadGhost.index} respawned!`)
+              return false
             }
-            return prev - 1
+            return true
           })
         }
-      }
 
-      // Respawn dead ghosts after 15 seconds (900 frames)
-      setDeadGhosts(prev => prev.filter(deadGhost => {
-        if (frameCountRef.current >= deadGhost.respawnTime) {
-          console.log(`👻 Ghost ${deadGhost.index} respawned!`)
-          return false
-        }
-        return true
-      }))
-
-      // Boss regeneration
-      if (isHiddenLevel && bossActive && !bossDefeated && bossHP < 3) {
-        setBossRegenTimer(prev => {
-          const newTimer = prev + (deltaTime / 16.67)
+        // Boss regeneration
+        if (isHiddenLevel && bossActive && !bossDefeated && bossHP < 3) {
+          const newTimer = bossRegenTimerRef.current + 1
           if (newTimer >= 1200) {
             console.log('🩸 Boss regenerating 1 HP!')
-            setBossHP(currentHP => Math.min(currentHP + 1, 3))
-            return 0
+            setBossHP(prev => Math.min(prev + 1, 3))
+            bossRegenTimerRef.current = 0
+          } else {
+            bossRegenTimerRef.current = newTimer
           }
-          return newTimer
-        })
+        }
+
+        // Animate Pac-Man's mouth at slower speed
+        if (frameCountRef.current % MOUTH_ANIMATION_SPEED === 0) {
+          setMouthOpen(prev => !prev)
+        }
+
+        // Check collisions every tick
+        checkCollisions()
       }
-    }
 
-    // Animate Pac-Man's mouth at slower speed (approx every MOUTH_ANIMATION_SPEED frames)
-    if (Math.floor(frameCountRef.current) % MOUTH_ANIMATION_SPEED === 0 && !deathAnimation) {
-      setMouthOpen(prev => !prev)
-    }
-
-    // Check collisions every frame for immediate detection
-    if (!deathAnimation) {
-      checkCollisions()
+      // Consume the time we just simulated
+      pacmanAccumRef.current -= FIXED_TIME_STEP
     }
 
     // Always draw for smooth rendering
@@ -1169,14 +1193,12 @@ const PacManGame = () => {
         drawBoard(ctx)
         drawPacman(ctx)
         drawGhosts(ctx)
-        if (frameCountRef.current % 60 === 0) { // Debug log every second
-          console.log('Game loop running, hidden level:', isHiddenLevel, 'playing:', isPlaying)
-        }
       }
     }
+  }, [isPlaying, movePacman, moveGhosts, moveBoss, checkCollisions, drawBoard, drawPacman, drawGhosts, deathAnimation, updateDeathAnimation, isHiddenLevel, bossActive, bossDefeated, bossHP])
 
-    animationRef.current = requestAnimationFrame(gameLoop)
-  }, [isPlaying, movePacman, moveGhosts, moveBoss, checkCollisions, drawBoard, drawPacman, drawGhosts, deathAnimation, updateDeathAnimation, isHiddenLevel, score, updateBossParticles, bossActive, bossHP, bossDefeated])
+  // Store latest gameLoop in ref so the rAF chain never breaks
+  useEffect(() => { gameLoopRef.current = gameLoop }, [gameLoop])
 
   // Handle keyboard input
   useEffect(() => {
@@ -1289,13 +1311,12 @@ const PacManGame = () => {
     setBossActive(useHiddenLevel)
     setBossDefeated(false)
     setBossHP(3)
-    setPowerMode(false)
-    setPowerTimer(0)
-    setHitEffects([])
-    setBossParticles([])
-    setDeadGhosts([]) // Reset dead ghosts
-    setBossRegenTimer(0) // Reset boss regeneration timer
-
+    bossRegenTimerRef.current = 0
+    powerModeRef.current = false
+    powerTimerRef.current = 0
+    hitEffectsRef.current = []
+    bossParticlesRef.current = []
+    deadGhostsRef.current = [] // Reset dead ghosts
     // Set playing and hidden level states
     setIsPlaying(true)
     setIsHiddenLevel(useHiddenLevel)
@@ -1343,7 +1364,11 @@ const PacManGame = () => {
   // Start game loop when playing
   useEffect(() => {
     if (isPlaying) {
-      animationRef.current = requestAnimationFrame(gameLoop)
+      const loop = (timestamp) => {
+        if (gameLoopRef.current) gameLoopRef.current(timestamp)
+        animationRef.current = requestAnimationFrame(loop)
+      }
+      animationRef.current = requestAnimationFrame(loop)
     } else {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
@@ -1355,7 +1380,7 @@ const PacManGame = () => {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [isPlaying, gameLoop])
+  }, [isPlaying])
 
 
   return (
@@ -1516,32 +1541,32 @@ const PacManGame = () => {
 
         {/* Mobile D-Pad (only visible on small screens when playing) */}
         {isPlaying && (
-          <div className="md:hidden mt-6 flex flex-col items-center gap-1 touch-none">
+          <div className="md:hidden mt-2 flex flex-col items-center gap-1 touch-none">
             <button
-              className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-t-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+              className="w-20 h-20 bg-gray-700/80 active:bg-[#ff5ea6] rounded-t-xl flex items-center justify-center text-4xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
               onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 3; }}
             >
               ⬆️
             </button>
             <div className="flex gap-1">
               <button
-                className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-l-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+                className="w-20 h-20 bg-gray-700/80 active:bg-[#ff5ea6] rounded-l-xl flex items-center justify-center text-4xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
                 onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 2; }}
               >
                 ⬅️
               </button>
-              <div className="w-14 h-14 bg-gray-800 rounded flex items-center justify-center">
-                <div className="w-6 h-6 bg-gray-900 rounded-full opacity-50"></div>
+              <div className="w-20 h-20 bg-gray-800 rounded flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-900 rounded-full opacity-50"></div>
               </div>
               <button
-                className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-r-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+                className="w-20 h-20 bg-gray-700/80 active:bg-[#ff5ea6] rounded-r-xl flex items-center justify-center text-4xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
                 onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 0; }}
               >
                 ➡️
               </button>
             </div>
             <button
-              className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-b-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+              className="w-20 h-20 bg-gray-700/80 active:bg-[#ff5ea6] rounded-b-xl flex items-center justify-center text-4xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
               onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 1; }}
             >
               ⬇️

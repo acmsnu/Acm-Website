@@ -229,7 +229,7 @@ export default function HomePage() {
         </motion.div>
 
         {/* Background Clouds */}
-        <motion.img src="/cloud2.webp" alt="" className="absolute top-[12%] xl:top-[20%] -left-4 xl:left-8 w-40 md:w-56 xl:w-72 pointer-events-none z-0" style={{ y: yClouds, imageRendering: 'pixelated' }} />
+        <motion.img src="/cloud2.webp" alt="" className="absolute top-[10%] xl:top-[20%] -left-4 xl:left-8 w-40 md:w-56 xl:w-72 pointer-events-none z-0" style={{ y: yClouds, imageRendering: 'pixelated' }} />
         <motion.img src="/cloud1.webp" alt="" className="absolute top-[30%] xl:top-[10%] -right-4 xl:right-8 w-48 md:w-64 xl:w-80 pointer-events-none z-0" style={{ y: yClouds, imageRendering: 'pixelated' }} />
 
         {/* Hero Section Center Image */}
@@ -252,7 +252,7 @@ export default function HomePage() {
               <a href="#about" className="hover:underline underline-offset-4 decoration-2">About</a>
               <Link to="/events" className="hover:underline underline-offset-4 decoration-2">Events</Link>
               <a href="#team" className="hover:underline underline-offset-4 decoration-2">Team</a>
-              <Link to="/games" className="hover:underline underline-offset-4 decoration-2 text-[#a8a0ff] hover:text-[#ff5ea6] drop-shadow-[0_0_5px_rgba(168,160,255,0.5)]">Games</Link>
+              <Link to="/games" className="hover:underline underline-offset-4 decoration-2 text-[#a8a0ff] hover:text-[#ff5ea6] drop-shadow-[0_0_5px_rgba(168,160,255,0.5)]">Arcade</Link>
             </nav>
 
             {/* Mobile Nav Toggle */}
@@ -282,7 +282,7 @@ export default function HomePage() {
                 <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">About</a>
                 <Link to="/events" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Events</Link>
                 <a href="#team" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Team</a>
-                <Link to="/games" onClick={() => setIsMobileMenuOpen(false)} className="text-[#a8a0ff] hover:text-[#ff5ea6]">Games</Link>
+                <Link to="/games" onClick={() => setIsMobileMenuOpen(false)} className="text-[#a8a0ff] hover:text-[#ff5ea6]">Arcade</Link>
               </motion.div>
             )}
           </AnimatePresence>
@@ -292,17 +292,17 @@ export default function HomePage() {
         <main className="flex-1 flex flex-col items-center justify-start text-center px-4 z-10 w-full max-w-5xl mx-auto pb-32 xl:pb-28">
 
           {/* Title */}
-          <div className="mb-2 select-none pt-6 min-[400px]:pt-16 xl:pt-0 flex flex-col items-center">
+          <div className="mb-2 select-none pt-6 min-[420px]:pt-16 xl:pt-0 flex flex-col items-center">
             <img src="/acmsnioe.webp" alt="ACM SNIOE Title" className="w-[260px] min-[400px]:w-[300px] md:w-[380px] xl:w-[480px] h-auto mb-2 pointer-events-none" style={{ imageRendering: 'pixelated' }} />
           </div>
 
           {/* Spacer that pushes content to bottom on tablets/phones, acts as fixed height on laptops */}
-          <div className="w-full flex-1 max-h-[80px] min-[400px]:max-h-none xl:flex-none xl:h-48 pointer-events-none"></div>
+          <div className="w-full flex-1 max-h-[80px] min-[420px]:max-h-none xl:flex-none xl:h-48 pointer-events-none"></div>
 
           <div className="flex flex-col items-center w-full mt-auto z-10">
             {/* White Pill Button (Everybody's) - Tilted slightly */}
             <div className="relative inline-flex items-center justify-center -rotate-[2deg] mb-1 cursor-pointer">
-              <img src="/white.webp" alt="Everybody's Pill bg" className="w-[200px] min-[400px]:w-[260px] md:w-[340px] xl:w-[420px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+              <img src="/white.webp" alt="Everybody's Pill bg" className="w-[220px] min-[420px]:w-[260px] md:w-[340px] xl:w-[420px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
               <span className="absolute font-pixelify text-black text-xl min-[400px]:text-2xl md:text-4xl xl:text-5xl tracking-tight -mt-1 md:-mt-2 font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)]">Everybody's</span>
             </div>
 
