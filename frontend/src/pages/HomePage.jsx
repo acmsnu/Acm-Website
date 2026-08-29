@@ -234,7 +234,7 @@ export default function HomePage() {
 
         {/* Hero Section Center Image */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
-          <img src="/herosectionimage-removebg-preview.webp" alt="Hero Background" className="w-[100vw] xl:w-[900px] 2xl:w-[1100px] max-w-none h-auto object-contain opacity-90" style={{ imageRendering: 'pixelated' }} />
+          <img src="/sage.webp" alt="Hero Background" className="w-[85vw] min-[400px]:w-[100vw] xl:w-[900px] 2xl:w-[600px] max-w-none h-auto object-contain opacity-90" style={{ imageRendering: 'pixelated' }} />
         </div>
 
         {/* Navbar */}
@@ -292,21 +292,21 @@ export default function HomePage() {
         <main className="flex-1 flex flex-col items-center justify-start text-center px-4 z-10 w-full max-w-5xl mx-auto pb-32 xl:pb-28">
 
           {/* Title */}
-          <div className="mb-2 select-none pt-16 xl:pt-0 flex flex-col items-center">
-            <img src="/acmsnioe.webp" alt="ACM SNIOE Title" className="w-[300px] md:w-[380px] xl:w-[480px] h-auto mb-2 pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+          <div className="mb-2 select-none pt-6 min-[400px]:pt-16 xl:pt-0 flex flex-col items-center">
+            <img src="/acmsnioe.webp" alt="ACM SNIOE Title" className="w-[260px] min-[400px]:w-[300px] md:w-[380px] xl:w-[480px] h-auto mb-2 pointer-events-none" style={{ imageRendering: 'pixelated' }} />
           </div>
 
           {/* Spacer that pushes content to bottom on tablets/phones, acts as fixed height on laptops */}
-          <div className="w-full flex-1 xl:flex-none xl:h-48 pointer-events-none"></div>
+          <div className="w-full flex-1 max-h-[80px] min-[400px]:max-h-none xl:flex-none xl:h-48 pointer-events-none"></div>
 
           <div className="flex flex-col items-center w-full mt-auto z-10">
             {/* White Pill Button (Everybody's) - Tilted slightly */}
             <div className="relative inline-flex items-center justify-center -rotate-[2deg] mb-1 cursor-pointer">
-              <img src="/white.webp" alt="Everybody's Pill bg" className="w-[260px] md:w-[340px] xl:w-[420px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
-              <span className="absolute font-pixelify text-black text-2xl md:text-4xl xl:text-5xl tracking-tight -mt-1 md:-mt-2 font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)]">Everybody's</span>
+              <img src="/white.webp" alt="Everybody's Pill bg" className="w-[200px] min-[400px]:w-[260px] md:w-[340px] xl:w-[420px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+              <span className="absolute font-pixelify text-black text-xl min-[400px]:text-2xl md:text-4xl xl:text-5xl tracking-tight -mt-1 md:-mt-2 font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)]">Everybody's</span>
             </div>
 
-            <h3 className="text-[#ff5ea6] font-pixelify text-3xl md:text-4xl xl:text-5xl mb-3 drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
+            <h3 className="text-[#ff5ea6] font-pixelify text-2xl min-[400px]:text-3xl md:text-4xl xl:text-5xl mb-3 drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
               Invited.
             </h3>
 

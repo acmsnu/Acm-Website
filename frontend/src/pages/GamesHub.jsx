@@ -104,7 +104,7 @@ export default function GamesHub() {
             <nav className="hidden md:flex items-center gap-4 xl:gap-6 font-vt323 text-xl md:text-2xl xl:tracking-wider">
               <Link to="/" className="hover:underline underline-offset-4 decoration-2">Home</Link>
               <Link to="/events" className="hover:underline underline-offset-4 decoration-2">Events</Link>
-              <Link to="/games" className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Games</Link>
+              <Link to="/games" className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Arcade</Link>
             </nav>
 
             <button 
@@ -128,7 +128,7 @@ export default function GamesHub() {
               >
                 <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Home</Link>
                 <Link to="/events" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#ff8cbe]">Events</Link>
-                <Link to="/games" onClick={() => setIsMobileMenuOpen(false)} className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Games</Link>
+                <Link to="/games" onClick={() => setIsMobileMenuOpen(false)} className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Arcade</Link>
               </motion.div>
             )}
           </AnimatePresence>

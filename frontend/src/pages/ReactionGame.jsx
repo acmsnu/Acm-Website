@@ -80,7 +80,7 @@ const ReactionGame = () => {
 
     try {
       const playerId = getPlayerId()
-      
+
       await fetch(`${API_BASE_URL}/leaderboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -292,224 +292,224 @@ const ReactionGame = () => {
           }
         }
       `}</style>
-      
+
       {/* Background styling for the page */}
       <div className="min-h-screen bg-[#0d071d] text-white pt-24 pb-12">
         <Link to="/games" className="absolute top-8 left-8 text-[#ff5ea6] hover:text-[#ff8cbe] flex items-center gap-2 font-vt323 text-2xl transition-colors">
           <ChevronLeft /> Back to Arcade
         </Link>
         <div className="container mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#2B7FFF] to-[#1E40AF] bg-clip-text text-transparent">
-              Reaction Time Game
-            </h1>
-            <div className="text-gray-400 text-lg">
-              Test your reflexes! Press SPACEBAR when the box turns green.
-            </div>
-          </div>
-
-          {/* Username Input */}
-          {gameState === 'idle' && (
-            <div className="p-6 mb-6">
-              <label className="block mb-2">
-                <span className="font-bold text-white">Your Name:</span>
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => saveUsername(e.target.value)}
-                placeholder="Enter your name"
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7FFF] text-foreground"
-                maxLength={20}
-              />
-            </div>
-          )}
-
-          {/* Difficulty Selection */}
-          {gameState === 'idle' && (
-            <div className="p-6 mb-6">
-              <span className="font-bold text-white mb-4 block">Select Difficulty:</span>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(Object.keys(DIFFICULTY_CONFIG) ).map((diff) => (
-                  <button
-                    key={diff}
-                    onClick={() => setDifficulty(diff)}
-                    className={`p-4 rounded-lg border-2 transition-all ${difficulty === diff
-                      ? 'border-[#2B7FFF] bg-[#2B7FFF]/10'
-                      : 'border-border hover:border-[#2B7FFF]/50'
-                      }`}
-                  >
-                    <span className="font-bold text-lg mb-1 block">
-                      {DIFFICULTY_CONFIG[diff].label}
-                    </span>
-                    <span className="text-sm text-gray-400 block">
-                      {DIFFICULTY_CONFIG[diff].min / 1000}s - {DIFFICULTY_CONFIG[diff].max / 1000}s delay
-                    </span>
-                  </button>
-                ))}
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#2B7FFF] to-[#1E40AF] bg-clip-text text-transparent">
+                Reaction Time Game
+              </h1>
+              <div className="text-gray-400 text-lg">
+                Test your reflexes! Press SPACEBAR when the box turns green.
               </div>
             </div>
-          )}
 
-          {/* Game Area */}
-          <div
-            className="mb-4 rounded-xl overflow-hidden select-none transition-all duration-300"
-            style={{
-              backgroundColor: getBackgroundColor(),
-              minHeight: '250px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: gameState === 'ready' ? '4px solid #10B981' : '1px solid hsl(var(--border))',
-              boxShadow: gameState === 'ready' ? '0 0 40px rgba(16, 185, 129, 0.5)' : 'none',
-              position: 'relative'
-            }}
-          >
-            {/* Ripple Animation */}
-            {ripple.active && (
-              <div
-                key={ripple.key}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '0',
-                  height: '0',
-                  borderRadius: '50%',
-                  backgroundColor: ripple.color === 'green' ? '#FFFFFF' : '#EF4444',
-                  opacity: 0.7,
-                  pointerEvents: 'none',
-                  animation: 'ripple-expand 250ms ease-out forwards'
-                }}
-              />
+            {/* Username Input */}
+            {gameState === 'idle' && (
+              <div className="p-6 mb-6">
+                <label className="block mb-2">
+                  <span className="font-bold text-white">Your Name:</span>
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => saveUsername(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B7FFF] text-foreground"
+                  maxLength={20}
+                />
+              </div>
             )}
 
-            <div className="text-center p-8" style={{ position: 'relative', zIndex: 1 }}>
-              <div
-                className={`text-3xl font-bold mb-4 ${gameState === 'waiting' || gameState === 'ready' || falseStart
-                  ? 'text-white'
-                  : ''
-                  }`}
-              >
-                {getInstructionText()}
+            {/* Difficulty Selection */}
+            {gameState === 'idle' && (
+              <div className="p-6 mb-6">
+                <span className="font-bold text-white mb-4 block">Select Difficulty:</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(Object.keys(DIFFICULTY_CONFIG)).map((diff) => (
+                    <button
+                      key={diff}
+                      onClick={() => setDifficulty(diff)}
+                      className={`p-4 rounded-lg border-2 transition-all ${difficulty === diff
+                        ? 'border-[#2B7FFF] bg-[#2B7FFF]/10'
+                        : 'border-border hover:border-[#2B7FFF]/50'
+                        }`}
+                    >
+                      <span className="font-bold text-lg mb-1 block">
+                        {DIFFICULTY_CONFIG[diff].label}
+                      </span>
+                      <span className="text-sm text-gray-400 block">
+                        {DIFFICULTY_CONFIG[diff].min / 1000}s - {DIFFICULTY_CONFIG[diff].max / 1000}s delay
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {gameState !== 'idle' && gameState !== 'results' && (
+            {/* Game Area */}
+            <div
+              className="mb-4 rounded-xl overflow-hidden select-none transition-all duration-300"
+              style={{
+                backgroundColor: getBackgroundColor(),
+                minHeight: '250px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: gameState === 'ready' ? '4px solid #10B981' : '1px solid hsl(var(--border))',
+                boxShadow: gameState === 'ready' ? '0 0 40px rgba(16, 185, 129, 0.5)' : 'none',
+                position: 'relative'
+              }}
+            >
+              {/* Ripple Animation */}
+              {ripple.active && (
                 <div
-                  className={`text-lg ${gameState === 'waiting' || gameState === 'ready' || falseStart ? 'text-white/80' : 'text-gray-400'}`}
+                  key={ripple.key}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '0',
+                    height: '0',
+                    borderRadius: '50%',
+                    backgroundColor: ripple.color === 'green' ? '#FFFFFF' : '#EF4444',
+                    opacity: 0.7,
+                    pointerEvents: 'none',
+                    animation: 'ripple-expand 250ms ease-out forwards'
+                  }}
+                />
+              )}
+
+              <div className="text-center p-8" style={{ position: 'relative', zIndex: 1 }}>
+                <div
+                  className={`text-3xl font-bold mb-4 ${gameState === 'waiting' || gameState === 'ready' || falseStart
+                    ? 'text-white'
+                    : ''
+                    }`}
                 >
-                  Round {round} of 5
+                  {getInstructionText()}
                 </div>
-              )}
 
-              {gameState === 'results' && (
-                <div className="mt-6 space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    {roundTimes.map((time, index) => (
-                      <div key={index} className="bg-white/10 rounded-lg p-3">
-                        <div className="text-white/60 text-sm mb-1">Round {index + 1}</div>
-                        <div className="text-white font-bold text-lg">{time}ms</div>
-                      </div>
-                    ))}
+                {gameState !== 'idle' && gameState !== 'results' && (
+                  <div
+                    className={`text-lg ${gameState === 'waiting' || gameState === 'ready' || falseStart ? 'text-white/80' : 'text-gray-400'}`}
+                  >
+                    Round {round} of 5
                   </div>
+                )}
 
-                  {bestTime && reactionTime < bestTime && (
-                    <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg p-4">
-                      <span weight="bold" className="text-yellow-300">🎉 New Personal Best!</span>
-                    </div>
-                  )}
-
-                  {bestTime && reactionTime >= bestTime && (
-                    <span className="text-white/80">
-                      Your best: {bestTime}ms
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Personal Stats */}
-          {bestTime && (
-            <div className="mb-2 px-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-gray-400 text-sm mb-1">
-                    Personal Best ({DIFFICULTY_CONFIG[difficulty].label})
-                  </div>
-                  <div className="text-[#2B7FFF] text-2xl font-bold">
-                    {bestTime}ms
-                  </div>
-                </div>
                 {gameState === 'results' && (
-                  <div className="text-right">
-                    <div className="text-gray-400 text-sm mb-1">
-                      Current Average
+                  <div className="mt-6 space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {roundTimes.map((time, index) => (
+                        <div key={index} className="bg-white/10 rounded-lg p-3">
+                          <div className="text-white/60 text-sm mb-1">Round {index + 1}</div>
+                          <div className="text-white font-bold text-lg">{time}ms</div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-2xl font-bold text-white">
-                      {reactionTime}ms
-                    </div>
+
+                    {bestTime && reactionTime < bestTime && (
+                      <div className="bg-yellow-500/20 border border-yellow-500 rounded-lg p-4">
+                        <span weight="bold" className="text-yellow-300">🎉 New Personal Best!</span>
+                      </div>
+                    )}
+
+                    {bestTime && reactionTime >= bestTime && (
+                      <span className="text-white/80">
+                        Your best: {bestTime}ms
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
             </div>
-          )}
 
-          {/* Control Buttons */}
-          <div className="flex gap-4 justify-center flex-wrap items-center mt-4 mb-8">
-            <button
-              onClick={startGame}
-              disabled={gameState !== 'idle' && gameState !== 'results'}
-              className="px-8 py-3 bg-[#2B7FFF] hover:bg-[#1E40AF] text-white font-vt323 text-3xl rounded transition-colors disabled:opacity-50"
-            >
-              {gameState === 'idle' ? 'Start Game' : 'Play Again'}
-            </button>
-
-            {gameState === 'results' && (
-              <button
-                onClick={resetGame}
-                className="px-6 py-3 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-vt323 text-2xl rounded transition-colors"
-              >
-                Change Difficulty
-              </button>
+            {/* Personal Stats */}
+            {bestTime && (
+              <div className="mb-2 px-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-gray-400 text-sm mb-1">
+                      Personal Best ({DIFFICULTY_CONFIG[difficulty].label})
+                    </div>
+                    <div className="text-[#2B7FFF] text-2xl font-bold">
+                      {bestTime}ms
+                    </div>
+                  </div>
+                  {gameState === 'results' && (
+                    <div className="text-right">
+                      <div className="text-gray-400 text-sm mb-1">
+                        Current Average
+                      </div>
+                      <div className="text-2xl font-bold text-white">
+                        {reactionTime}ms
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
-            <button
-              onClick={() => setIsMuted(!isMuted)}
-              className="w-14 h-14 bg-gray-700 hover:bg-gray-600 text-white rounded flex items-center justify-center text-2xl transition-colors"
-              title={isMuted ? 'Unmute' : 'Mute'}
-            >
-              {isMuted ? '🔇' : '🔊'}
-            </button>
-          </div>
+            {/* Control Buttons */}
+            <div className="flex gap-4 justify-center flex-wrap items-center mt-4 mb-8">
+              <button
+                onClick={startGame}
+                disabled={gameState !== 'idle' && gameState !== 'results'}
+                className="px-8 py-3 bg-[#2B7FFF] hover:bg-[#1E40AF] text-white font-vt323 text-3xl rounded transition-colors disabled:opacity-50"
+              >
+                {gameState === 'idle' ? 'Start Game' : 'Play Again'}
+              </button>
 
-          {/* Hidden Audio Elements */}
-          <audio ref={validSoundRef} preload="auto">
-            <source src="/audio/success_bell-6776.mp3" type="audio/mpeg" />
-          </audio>
-          <audio ref={errorSoundRef} preload="auto">
-            <source src="/audio/error-sound-39539.mp3" type="audio/mpeg" />
-          </audio>
+              {gameState === 'results' && (
+                <button
+                  onClick={resetGame}
+                  className="px-6 py-3 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-vt323 text-2xl rounded transition-colors"
+                >
+                  Change Difficulty
+                </button>
+              )}
 
-          {/* Tips */}
-          {gameState === 'idle' && (
-            <div className="mt-6 p-6">
-              <span weight="bold" className="mb-3">Tips:</span>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>• Wait for the box to turn <span className="text-green-500 font-bold">GREEN</span> before pressing spacebar</li>
-                <li>• Press <span className="font-bold bg-muted px-2 py-0.5 rounded">SPACEBAR</span> only when green!</li>
-                <li>• Pressing too early (on red) counts as a false start</li>
-                <li>• You'll play exactly 5 rounds - your average time is recorded</li>
-                <li>• Higher difficulty = shorter wait times = higher score multiplier</li>
-                <li>• Try to beat your personal best!</li>
-              </ul>
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className="w-14 h-14 bg-gray-700 hover:bg-gray-600 text-white rounded flex items-center justify-center text-2xl transition-colors"
+                title={isMuted ? 'Unmute' : 'Mute'}
+              >
+                {isMuted ? '🔇' : '🔊'}
+              </button>
             </div>
-          )}
+
+            {/* Hidden Audio Elements */}
+            <audio ref={validSoundRef} preload="auto">
+              <source src="/audio/success_bell-6776.mp3" type="audio/mpeg" />
+            </audio>
+            <audio ref={errorSoundRef} preload="auto">
+              <source src="/audio/error-sound-39539.mp3" type="audio/mpeg" />
+            </audio>
+
+            {/* Tips */}
+            {gameState === 'idle' && (
+              <div className="mt-6 p-6">
+                <span weight="bold" className="mb-3">Tips:</span>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Wait for the box to turn <span className="text-green-500 font-bold">GREEN</span> before pressing spacebar</li>
+                  <li>• Press <span className="font-bold bg-muted px-2 py-0.5 rounded">SPACEBAR</span> only when green!</li>
+                  <li>• Pressing too early (on red) counts as a false start</li>
+                  <li>• You'll play exactly 5 rounds - your average time is recorded</li>
+                  <li>• Higher difficulty = shorter wait times = higher score multiplier</li>
+                  <li>• Try to beat your personal best!</li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </div>
     </>
   )

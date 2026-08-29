@@ -20,77 +20,77 @@ const MOUTH_ANIMATION_SPEED = 12 // Mouth animation every 12 frames (slower than
 
 // Game board layout (0 = empty, 1 = wall, 2 = dot, 3 = power pellet, 4 = pacman start, 5 = ghost start)
 const BOARD_LAYOUT = [
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
-  [1,3,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,3,1],
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-  [1,2,1,1,1,2,1,2,1,1,1,2,1,2,1,1,1,2,1],
-  [1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1],
-  [1,1,1,1,1,2,1,1,1,0,1,1,1,2,1,1,1,1,1],
-  [0,0,0,0,1,2,1,0,0,0,0,0,1,2,1,0,0,0,0],
-  [1,1,1,1,1,2,1,0,1,1,1,0,1,2,1,1,1,1,1],
-  [0,0,0,0,0,2,0,0,0,5,0,0,0,2,0,0,0,0,0],
-  [1,1,1,1,1,2,1,0,1,1,1,0,1,2,1,1,1,1,1],
-  [0,0,0,0,1,2,1,0,0,0,0,0,1,2,1,0,0,0,0],
-  [1,1,1,1,1,2,1,1,1,0,1,1,1,2,1,1,1,1,1],
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-  [1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1],
-  [1,3,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,3,1],
-  [1,1,1,2,1,2,1,2,1,1,1,2,1,2,1,2,1,1,1],
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-  [1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,2,1], // row 18 - fake walls [15][16] lead to portal at [16]
-  [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+  [1, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 1],
+  [1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 2, 1], // row 18 - fake walls [15][16] lead to portal at [16]
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
 // Hidden level board layout - challenging maze with sword pellet, breakable wall, and power pellets
 const HIDDEN_LEVEL_LAYOUT = [
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,1],
-  [1,2,1,2,1,2,1,1,1,2,1,1,1,2,1,2,1,2,1],
-  [1,2,1,2,2,2,2,2,1,2,1,2,2,2,2,2,1,2,1],
-  [1,2,1,1,1,1,1,2,1,2,1,2,1,1,1,1,1,2,1],
-  [1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1],
-  [1,1,1,1,1,2,1,1,1,0,1,1,1,2,1,1,1,1,1],
-  [0,0,0,0,1,2,0,0,0,0,0,0,0,2,1,0,0,0,0],
-  [1,1,1,2,1,2,1,1,1,0,1,1,1,2,1,2,1,1,1],
-  [0,0,1,2,2,2,1,2,2,2,2,2,1,2,2,2,1,0,0],
-  [1,2,1,1,1,2,1,2,1,1,1,2,1,2,1,1,1,2,1],
-  [1,2,2,2,1,2,2,2,1,2,1,2,2,2,1,2,2,2,1],
-  [1,1,1,2,1,1,1,2,1,2,1,2,1,1,1,2,1,1,1],
-  [1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1],
-  [1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1],
-  [1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1],
-  [1,2,1,2,1,1,1,1,3,2,1,1,1,1,1,2,1,2,1], // Sword pellet at (8,16)
-  [1,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,1],
-  [1,1,1,1,1,1,1,1,8,1,1,1,1,1,1,1,1,1,1], // Breakable wall at (8,18)
-  [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1], // Power pellets at (1,19) and (17,19)
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+  [1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1],
+  [1, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1],
+  [1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1],
+  [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0],
+  [1, 1, 1, 2, 1, 2, 1, 1, 1, 0, 1, 1, 1, 2, 1, 2, 1, 1, 1],
+  [0, 0, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 0, 0],
+  [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1],
+  [1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1],
+  [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1],
+  [1, 2, 1, 2, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1], // Sword pellet at (8,16)
+  [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // Breakable wall at (8,18)
+  [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1], // Power pellets at (1,19) and (17,19)
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
 // Special items for hidden level (6 = sword, 7 = boss spawn point)
 const HIDDEN_LEVEL_ITEMS = [
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0], // Sword at (8,16)
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0], // Boss spawn at (7,19)
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Sword at (8,16)
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Boss spawn at (7,19)
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
 // Types
@@ -111,6 +111,8 @@ const PacManGame = () => {
   const [pacmanDead, setPacmanDead] = useState(false)
   const [mouthOpen, setMouthOpen] = useState(true)
   const [deathAnimation, setDeathAnimation] = useState(false)
+  const [powerMode, setPowerMode] = useState(false)
+  const [powerTimer, setPowerTimer] = useState(0)
   const [hiddenLevelUnlocked, setHiddenLevelUnlocked] = useState(false)
   const [showUnlockPopup, setShowUnlockPopup] = useState(false)
   const [isHiddenLevel, setIsHiddenLevel] = useState(false)
@@ -141,6 +143,10 @@ const PacManGame = () => {
   const bossRef = useRef({ x: 9, y: 19 })
   const animationRef = useRef(undefined)
   const frameCountRef = useRef(0)
+  const lastTimeRef = useRef(0)
+  const pacmanAccumRef = useRef(0)
+  const ghostAccumRef = useRef(0)
+  const effectsAccumRef = useRef(0)
 
   // Get or create player_id
   const getPlayerId = () => {
@@ -158,7 +164,7 @@ const PacManGame = () => {
       const playerId = getPlayerId()
       const name = username.trim() || 'warrior'
       console.log('Submitting score:', finalScore, 'for', name)
-      
+
       await fetch(`${API_BASE_URL}/leaderboard`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +197,7 @@ const PacManGame = () => {
           if (!(deathAnimation && x === pacmanRef.current.x && y === pacmanRef.current.y)) {
             ctx.fillStyle = '#FFFF00'
             ctx.beginPath()
-            ctx.arc(x * CELL_SIZE + CELL_SIZE/2, y * CELL_SIZE + CELL_SIZE/2, 2, 0, 2 * Math.PI)
+            ctx.arc(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2, 2, 0, 2 * Math.PI)
             ctx.fill()
           }
         } else if (cell === 3) {
@@ -199,7 +205,7 @@ const PacManGame = () => {
           if (!(deathAnimation && x === pacmanRef.current.x && y === pacmanRef.current.y)) {
             ctx.fillStyle = '#FFFF00'
             ctx.beginPath()
-            ctx.arc(x * CELL_SIZE + CELL_SIZE/2, y * CELL_SIZE + CELL_SIZE/2, 5, 0, 2 * Math.PI)
+            ctx.arc(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2, 5, 0, 2 * Math.PI)
             ctx.fill()
           }
         } else if (cell === 8) {
@@ -234,8 +240,8 @@ const PacManGame = () => {
         const swordX = 8
         if (HIDDEN_LEVEL_ITEMS[swordY][swordX] === 6) {
           console.log(`🎨 Drawing sword at (${swordX}, ${swordY})`)
-          const swordCenterX = swordX * CELL_SIZE + CELL_SIZE/2
-          const swordCenterY = swordY * CELL_SIZE + CELL_SIZE/2
+          const swordCenterX = swordX * CELL_SIZE + CELL_SIZE / 2
+          const swordCenterY = swordY * CELL_SIZE + CELL_SIZE / 2
 
           // Draw shadow trail effect
           for (let i = 1; i <= 3; i++) {
@@ -319,8 +325,8 @@ const PacManGame = () => {
           ctx.fillStyle = '#FF0000' // Red particles
           ctx.beginPath()
           ctx.arc(
-            particle.x * CELL_SIZE + CELL_SIZE/2,
-            particle.y * CELL_SIZE + CELL_SIZE/2,
+            particle.x * CELL_SIZE + CELL_SIZE / 2,
+            particle.y * CELL_SIZE + CELL_SIZE / 2,
             3, // Small particle size
             0,
             2 * Math.PI
@@ -341,8 +347,8 @@ const PacManGame = () => {
             for (let i = 0; i < 5; i++) {
               const angle = (i / 5) * 2 * Math.PI
               const distance = effectSize * 0.5
-              const sparkleX = effect.x * CELL_SIZE + CELL_SIZE/2 + Math.cos(angle) * distance
-              const sparkleY = effect.y * CELL_SIZE + CELL_SIZE/2 + Math.sin(angle) * distance
+              const sparkleX = effect.x * CELL_SIZE + CELL_SIZE / 2 + Math.cos(angle) * distance
+              const sparkleY = effect.y * CELL_SIZE + CELL_SIZE / 2 + Math.sin(angle) * distance
               ctx.beginPath()
               ctx.arc(sparkleX, sparkleY, 2, 0, 2 * Math.PI)
               ctx.fill()
@@ -352,8 +358,8 @@ const PacManGame = () => {
             ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`
             ctx.beginPath()
             ctx.arc(
-              effect.x * CELL_SIZE + CELL_SIZE/2,
-              effect.y * CELL_SIZE + CELL_SIZE/2,
+              effect.x * CELL_SIZE + CELL_SIZE / 2,
+              effect.y * CELL_SIZE + CELL_SIZE / 2,
               effectSize,
               0,
               2 * Math.PI
@@ -364,8 +370,8 @@ const PacManGame = () => {
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`
             ctx.beginPath()
             ctx.arc(
-              effect.x * CELL_SIZE + CELL_SIZE/2,
-              effect.y * CELL_SIZE + CELL_SIZE/2,
+              effect.x * CELL_SIZE + CELL_SIZE / 2,
+              effect.y * CELL_SIZE + CELL_SIZE / 2,
               effectSize * 0.5,
               0,
               2 * Math.PI
@@ -384,9 +390,9 @@ const PacManGame = () => {
     const pacman = pacmanRef.current
     const dir = directionRef.current
 
-    const centerX = pacman.x * CELL_SIZE + CELL_SIZE/2
-    const centerY = pacman.y * CELL_SIZE + CELL_SIZE/2
-    const radius = CELL_SIZE/2 - 2
+    const centerX = pacman.x * CELL_SIZE + CELL_SIZE / 2
+    const centerY = pacman.y * CELL_SIZE + CELL_SIZE / 2
+    const radius = CELL_SIZE / 2 - 2
 
     ctx.beginPath()
 
@@ -467,7 +473,7 @@ const PacManGame = () => {
         const shadowY = y + shadowOffsetY
 
         // Draw ghost-shaped shadow (same path as main body)
-        ctx.arc(shadowX + CELL_SIZE/2, shadowY + CELL_SIZE/3, CELL_SIZE/3, Math.PI, 0, false)
+        ctx.arc(shadowX + CELL_SIZE / 2, shadowY + CELL_SIZE / 3, CELL_SIZE / 3, Math.PI, 0, false)
 
         // Right side
         ctx.lineTo(shadowX + CELL_SIZE - 2, shadowY + 2)
@@ -489,11 +495,11 @@ const PacManGame = () => {
       }
 
       // Main body
-      ctx.fillStyle = deathEffect ? '#0000FF' : ghost.color
+      ctx.fillStyle = powerMode ? '#0000FF' : ghost.color
       ctx.beginPath()
 
       // Top rounded part
-      ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/3, CELL_SIZE/3, Math.PI, 0, false)
+      ctx.arc(x + CELL_SIZE / 2, y + CELL_SIZE / 3, CELL_SIZE / 3, Math.PI, 0, false)
 
       // Right side
       ctx.lineTo(x + CELL_SIZE - 2, y + 2)
@@ -516,7 +522,7 @@ const PacManGame = () => {
       // Body highlights/details
       ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'
       ctx.beginPath()
-      ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/4, CELL_SIZE/6, 0, Math.PI, true)
+      ctx.arc(x + CELL_SIZE / 2, y + CELL_SIZE / 4, CELL_SIZE / 6, 0, Math.PI, true)
       ctx.fill()
 
       // Eyes with direction-based pupils
@@ -525,12 +531,12 @@ const PacManGame = () => {
       // Left eye
       ctx.fillStyle = '#FFFFFF'
       ctx.beginPath()
-      ctx.arc(x + CELL_SIZE/3 + eyeOffset, y + CELL_SIZE/3, 4, 0, 2 * Math.PI)
+      ctx.arc(x + CELL_SIZE / 3 + eyeOffset, y + CELL_SIZE / 3, 4, 0, 2 * Math.PI)
       ctx.fill()
 
       // Right eye
       ctx.beginPath()
-      ctx.arc(x + 2*CELL_SIZE/3 + eyeOffset, y + CELL_SIZE/3, 4, 0, 2 * Math.PI)
+      ctx.arc(x + 2 * CELL_SIZE / 3 + eyeOffset, y + CELL_SIZE / 3, 4, 0, 2 * Math.PI)
       ctx.fill()
 
       // Pupils that look in movement direction
@@ -546,36 +552,36 @@ const PacManGame = () => {
       }
 
       ctx.beginPath()
-      ctx.arc(x + CELL_SIZE/3 + eyeOffset + pupilOffsetX, y + CELL_SIZE/3 + pupilOffsetY, 1.5, 0, 2 * Math.PI)
+      ctx.arc(x + CELL_SIZE / 3 + eyeOffset + pupilOffsetX, y + CELL_SIZE / 3 + pupilOffsetY, 1.5, 0, 2 * Math.PI)
       ctx.fill()
 
       // Right pupil
       ctx.beginPath()
-      ctx.arc(x + 2*CELL_SIZE/3 + eyeOffset + pupilOffsetX, y + CELL_SIZE/3 + pupilOffsetY, 1.5, 0, 2 * Math.PI)
+      ctx.arc(x + 2 * CELL_SIZE / 3 + eyeOffset + pupilOffsetX, y + CELL_SIZE / 3 + pupilOffsetY, 1.5, 0, 2 * Math.PI)
       ctx.fill()
 
       // Eyebrows for expression
       ctx.strokeStyle = ghost.color
       ctx.lineWidth = 1
       ctx.beginPath()
-      ctx.moveTo(x + CELL_SIZE/3 - 2, y + CELL_SIZE/4)
-      ctx.lineTo(x + CELL_SIZE/3 + 2, y + CELL_SIZE/4)
-      ctx.moveTo(x + 2*CELL_SIZE/3 - 2, y + CELL_SIZE/4)
-      ctx.lineTo(x + 2*CELL_SIZE/3 + 2, y + CELL_SIZE/4)
+      ctx.moveTo(x + CELL_SIZE / 3 - 2, y + CELL_SIZE / 4)
+      ctx.lineTo(x + CELL_SIZE / 3 + 2, y + CELL_SIZE / 4)
+      ctx.moveTo(x + 2 * CELL_SIZE / 3 - 2, y + CELL_SIZE / 4)
+      ctx.lineTo(x + 2 * CELL_SIZE / 3 + 2, y + CELL_SIZE / 4)
       ctx.stroke()
 
       // Optional: Add some pattern/details based on ghost type
       if (index === 0) { // Red ghost - add some dots
         ctx.fillStyle = '#FFFFFF'
         ctx.beginPath()
-        ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/2, 1, 0, 2 * Math.PI)
+        ctx.arc(x + CELL_SIZE / 2, y + CELL_SIZE / 2, 1, 0, 2 * Math.PI)
         ctx.fill()
       } else if (index === 1) { // Pink ghost - add some lines
         ctx.strokeStyle = '#FFFFFF'
         ctx.lineWidth = 1
         ctx.beginPath()
-        ctx.moveTo(x + CELL_SIZE/4, y + CELL_SIZE/2)
-        ctx.lineTo(x + 3*CELL_SIZE/4, y + CELL_SIZE/2)
+        ctx.moveTo(x + CELL_SIZE / 4, y + CELL_SIZE / 2)
+        ctx.lineTo(x + 3 * CELL_SIZE / 4, y + CELL_SIZE / 2)
         ctx.stroke()
       }
     })
@@ -765,7 +771,7 @@ const PacManGame = () => {
           setLevel(prev => prev + 1)
           setIsPlaying(false)
           setShowLevelTransition(true)
-          
+
           setTimeout(() => {
             setShowLevelTransition(false)
             startGame(false, true) // Restart board, preserve score and lives
@@ -886,7 +892,15 @@ const PacManGame = () => {
       if (ghost.x === pacman.x && ghost.y === pacman.y && !deathAnimation) {
         console.log(`👻 Collision detected! Ghost ${index} at (${ghost.x},${ghost.y}), Pac-Man at (${pacman.x},${pacman.y})`)
 
-        if (isHiddenLevel && hasSword) {
+        if (powerMode) {
+          // Eat ghost during power mode
+          console.log(`👻 Ghost ${index} eaten!`)
+          setScore(prevScore => prevScore + 200)
+          setHitEffects(prev => [...prev, { x: ghost.x, y: ghost.y, text: '+200', timer: 30 }])
+          // Respawn immediately at center
+          ghost.x = 9
+          ghost.y = 9
+        } else if (isHiddenLevel && hasSword) {
           // Kill the ghost with sword (hidden level only)
           console.log(`⚔️ Ghost ${index} defeated by sword!`)
           setDeadGhosts(prev => [...prev, {
@@ -1040,78 +1054,109 @@ const PacManGame = () => {
   }, [deathAnimation, score, submitScore])
 
   // Game loop
-  const gameLoop = useCallback(() => {
+  const gameLoop = useCallback((timestamp) => {
     if (!isPlaying) return
 
-    // Only move every GAME_SPEED frames for slower gameplay
-    frameCountRef.current++
+    if (!lastTimeRef.current) lastTimeRef.current = timestamp
+
+    // Cap deltaTime at 100ms to avoid spiral of death on lag spikes
+    const deltaTime = Math.min(timestamp - lastTimeRef.current, 100)
+    lastTimeRef.current = timestamp
+
+    pacmanAccumRef.current += deltaTime
+    ghostAccumRef.current += deltaTime
+    effectsAccumRef.current += deltaTime
+
+    // We still increment frameCountRef for things that just need a long timer (like respawns/boss regen)
+    // 1 frame is roughly 16.67ms
+    frameCountRef.current += (deltaTime / 16.67)
 
     // Calculate current game speed based on score (gradually increases)
     const currentGameSpeed = Math.max(MIN_GAME_SPEED, INITIAL_GAME_SPEED - Math.floor(score / SPEED_INCREASE_INTERVAL))
+    const pacmanThreshold = currentGameSpeed * 16.67
 
     if (deathAnimation) {
       // Handle death animation movement
-      if (frameCountRef.current % currentGameSpeed === 0) {
+      while (pacmanAccumRef.current >= pacmanThreshold) {
         updateDeathAnimation()
+        pacmanAccumRef.current -= pacmanThreshold
       }
     } else {
       // Normal gameplay - Pac-Man moves based on current speed
-      if (frameCountRef.current % currentGameSpeed === 0) {
+      while (pacmanAccumRef.current >= pacmanThreshold) {
         movePacman()
+        pacmanAccumRef.current -= pacmanThreshold
       }
 
-      // Ghosts move at different speeds based on level (slightly slower than Pac-Man normally, faster in hidden level)
+      // Ghosts move at different speeds based on level
       const currentGhostSpeed = isHiddenLevel ? Math.max(2, currentGameSpeed - 2) : currentGameSpeed + 2
-      if (frameCountRef.current % currentGhostSpeed === 0) {
+      const ghostThreshold = currentGhostSpeed * 16.67
+
+      while (ghostAccumRef.current >= ghostThreshold) {
         moveGhosts()
-        // Boss moves at same speed as ghosts in hidden level
         if (isHiddenLevel) {
           moveBoss()
         }
+        ghostAccumRef.current -= ghostThreshold
       }
 
-      // Update boss particles every frame
-      if (isHiddenLevel && bossActive) {
+      // Update boss particles every frame (approx 60fps)
+      if (isHiddenLevel && bossActive && effectsAccumRef.current >= 16.67) {
         updateBossParticles()
       }
 
-      // Update hit effects
-      setHitEffects(prev => prev.map(effect => ({
-        ...effect,
-        timer: effect.timer - 1
-      })).filter(effect => effect.timer > 0))
+      // Process effects every ~16.67ms
+      if (effectsAccumRef.current >= 16.67) {
+        effectsAccumRef.current -= 16.67
+        if (effectsAccumRef.current > 33) effectsAccumRef.current = 33 // Prevent huge backlog
+
+        // Update hit effects
+        setHitEffects(prev => prev.map(effect => ({
+          ...effect,
+          timer: effect.timer - 1
+        })).filter(effect => effect.timer > 0))
+
+        // Update power timer
+        if (powerMode) {
+          setPowerTimer(prev => {
+            if (prev <= 1) {
+              setPowerMode(false)
+              return 0
+            }
+            return prev - 1
+          })
+        }
+      }
 
       // Respawn dead ghosts after 15 seconds (900 frames)
       setDeadGhosts(prev => prev.filter(deadGhost => {
         if (frameCountRef.current >= deadGhost.respawnTime) {
           console.log(`👻 Ghost ${deadGhost.index} respawned!`)
-          // Ghost is respawned, remove from dead list
           return false
         }
         return true
       }))
 
-      // Boss regeneration - slowly regain HP over time (hidden level only)
+      // Boss regeneration
       if (isHiddenLevel && bossActive && !bossDefeated && bossHP < 3) {
         setBossRegenTimer(prev => {
-          const newTimer = prev + 1
-          // Regenerate 1 HP every 20 seconds (1200 frames at 60fps) - slower regeneration
+          const newTimer = prev + (deltaTime / 16.67)
           if (newTimer >= 1200) {
             console.log('🩸 Boss regenerating 1 HP!')
-            setBossHP(currentHP => Math.min(currentHP + 1, 3)) // Cap at 3 HP
-            return 0 // Reset timer
+            setBossHP(currentHP => Math.min(currentHP + 1, 3))
+            return 0
           }
           return newTimer
         })
       }
     }
 
-    // Animate Pac-Man's mouth at slower speed
-    if (frameCountRef.current % MOUTH_ANIMATION_SPEED === 0 && !deathAnimation) {
+    // Animate Pac-Man's mouth at slower speed (approx every MOUTH_ANIMATION_SPEED frames)
+    if (Math.floor(frameCountRef.current) % MOUTH_ANIMATION_SPEED === 0 && !deathAnimation) {
       setMouthOpen(prev => !prev)
     }
 
-    // Check collisions every frame for immediate detection (but not during death animation)
+    // Check collisions every frame for immediate detection
     if (!deathAnimation) {
       checkCollisions()
     }
@@ -1234,7 +1279,7 @@ const PacManGame = () => {
       setLives(3)
       setLevel(1)
     }
-    
+
     setGameOver(false)
     setGameWon(false)
     setDeathEffect(false)
@@ -1244,6 +1289,8 @@ const PacManGame = () => {
     setBossActive(useHiddenLevel)
     setBossDefeated(false)
     setBossHP(3)
+    setPowerMode(false)
+    setPowerTimer(0)
     setHitEffects([])
     setBossParticles([])
     setDeadGhosts([]) // Reset dead ghosts
@@ -1256,6 +1303,10 @@ const PacManGame = () => {
     console.log('States set: isPlaying=true, isHiddenLevel=', useHiddenLevel, 'score preserved:', preserveScoreAndLives)
 
     frameCountRef.current = 0
+    lastTimeRef.current = 0
+    pacmanAccumRef.current = 0
+    ghostAccumRef.current = 0
+    effectsAccumRef.current = 0
 
     // Choose board layout
     const layoutToUse = useHiddenLevel ? HIDDEN_LEVEL_LAYOUT : BOARD_LAYOUT
@@ -1306,176 +1357,211 @@ const PacManGame = () => {
     }
   }, [isPlaying, gameLoop])
 
-  
+
   return (
     <div className="min-h-screen bg-[#0d071d] pt-24 pb-12 font-vt323 relative">
       <Link to="/games" className="absolute top-8 left-8 text-[#ff5ea6] hover:text-[#ff8cbe] flex items-center gap-2 font-vt323 text-2xl transition-colors">
         <ChevronLeft /> Back to Arcade
       </Link>
       <div className="flex flex-col items-center gap-4 p-4">
-      {/* Username input */}
-      {!isPlaying && (
-        <div className="mb-4">
-          <label className="text-white text-sm mb-2 block">Enter your name:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="warrior"
-            className="px-3 py-2 bg-gray-800 text-white border border-gray-600 rounded focus:outline-none focus:border-blue-500"
-            maxLength={20}
-          />
-        </div>
-      )}
-
-      <div className="flex gap-8 text-white">
-        <div>Score: {score}</div>
-        <div>Level: {level}</div>
-        <div>Lives: {lives}</div>
-      </div>
-
-
-
-      {/* HP Bars for Hidden Level */}
-      {isPlaying && isHiddenLevel && (
-        <div className="flex gap-8 w-full max-w-md">
-          {/* Player HP */}
-          <div className="flex-1">
-            <div className="text-white text-sm mb-1">Player HP</div>
-            <div className="bg-gray-800 border border-gray-600 rounded p-2">
-              <div className="bg-green-500 h-4 rounded" style={{ width: `${(lives / 3) * 100}%` }}></div>
-              <div className="text-white text-xs mt-1">{lives}/3</div>
-            </div>
+        {/* Username input */}
+        {!isPlaying && (
+          <div className="mb-4">
+            <label className="text-white text-sm mb-2 block">Enter your name:</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="warrior"
+              className="px-3 py-2 bg-gray-800 text-white border border-gray-600 rounded focus:outline-none focus:border-blue-500"
+              maxLength={20}
+            />
           </div>
+        )}
 
-          {/* Boss HP */}
-          {bossActive && !bossDefeated && (
+        <div className="flex gap-8 text-white">
+          <div>Score: {score}</div>
+          <div>Level: {level}</div>
+          <div>Lives: {lives}</div>
+        </div>
+
+
+
+        {/* HP Bars for Hidden Level */}
+        {isPlaying && isHiddenLevel && (
+          <div className="flex gap-8 w-full max-w-md">
+            {/* Player HP */}
             <div className="flex-1">
-              <div className="text-white text-sm mb-1">Boss HP</div>
+              <div className="text-white text-sm mb-1">Player HP</div>
               <div className="bg-gray-800 border border-gray-600 rounded p-2">
-                <div className="bg-red-500 h-4 rounded" style={{ width: `${(bossHP / 3) * 100}%` }}></div>
-                <div className="text-white text-xs mt-1">{bossHP}/3</div>
+                <div className="bg-green-500 h-4 rounded" style={{ width: `${(lives / 3) * 100}%` }}></div>
+                <div className="text-white text-xs mt-1">{lives}/3</div>
               </div>
             </div>
-          )}
-        </div>
-      )}
 
-      {/* Test button when test mode is enabled */}
-      {testModeEnabled && !isPlaying && (
-        <div className="mb-4">
-          <button className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-bold rounded transition-colors" onClick={setTestScore}>
-            🎯 Set 80% Score (Test)
-          </button>
-        </div>
-      )}
-
-      <div className="mt-4 mb-8 flex flex-col items-center w-full">
-        <canvas
-          ref={canvasRef}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT}
-          className="border-4 border-blue-800 rounded-lg shadow-[0_0_20px_rgba(30,58,138,0.5)] w-[95%] max-w-[380px] md:max-w-[500px] lg:max-w-[570px] h-auto aspect-[380/420]"
-          style={{ imageRendering: 'pixelated' }}
-          tabIndex={0}
-        />
-
-        {!isPlaying && !gameOver && !gameWon && (
-          <div className="flex gap-4 justify-center mt-6">
-            <button className="px-8 py-3 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-vt323 text-3xl rounded transition-colors shadow-[0_0_15px_rgba(255,94,166,0.4)]" onClick={() => startGame(false)}>Start Game</button>
-            {hiddenLevelUnlocked && (
-              <button className="px-8 py-3 bg-[#a8a0ff] hover:bg-[#c4bfff] text-white font-vt323 text-3xl rounded transition-colors shadow-[0_0_15px_rgba(168,160,255,0.4)]" onClick={() => startGame(true)}>
-                Hidden Level
-              </button>
+            {/* Boss HP */}
+            {bossActive && !bossDefeated && (
+              <div className="flex-1">
+                <div className="text-white text-sm mb-1">Boss HP</div>
+                <div className="bg-gray-800 border border-gray-600 rounded p-2">
+                  <div className="bg-red-500 h-4 rounded" style={{ width: `${(bossHP / 3) * 100}%` }}></div>
+                  <div className="text-white text-xs mt-1">{bossHP}/3</div>
+                </div>
+              </div>
             )}
           </div>
         )}
-      </div>
 
-      {gameOver && (
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-2">Game Over!</div>
-          <div className="text-white mb-4">Final Score: {score}</div>
-          <button className="px-4 py-2 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-bold rounded transition-colors" onClick={() => startGame(false)}>Play Again</button>
+        {/* Test button when test mode is enabled */}
+        {testModeEnabled && !isPlaying && (
+          <div className="mb-4">
+            <button className="px-4 py-2 bg-red-500 hover:bg-red-400 text-white font-bold rounded transition-colors" onClick={setTestScore}>
+              🎯 Set 80% Score (Test)
+            </button>
+          </div>
+        )}
+
+        <div className="mt-4 mb-8 flex flex-col items-center w-full">
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            className="border-4 border-blue-800 rounded-lg shadow-[0_0_20px_rgba(30,58,138,0.5)] w-[95%] max-w-[380px] md:max-w-[500px] lg:max-w-[570px] h-auto aspect-[380/420]"
+            style={{ imageRendering: 'pixelated' }}
+            tabIndex={0}
+          />
+
+          {!isPlaying && !gameOver && !gameWon && (
+            <div className="flex gap-4 justify-center mt-6">
+              <button className="px-8 py-3 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-vt323 text-3xl rounded transition-colors shadow-[0_0_15px_rgba(255,94,166,0.4)]" onClick={() => startGame(false)}>Start Game</button>
+              {hiddenLevelUnlocked && (
+                <button className="px-8 py-3 bg-[#a8a0ff] hover:bg-[#c4bfff] text-white font-vt323 text-3xl rounded transition-colors shadow-[0_0_15px_rgba(168,160,255,0.4)]" onClick={() => startGame(true)}>
+                  Hidden Level
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      )}
 
-      {gameWon && (
-        <div className="text-center">
-          <div className="text-green-500 text-xl mb-2">You Won!</div>
-          <div className="text-white mb-4">Final Score: {score}</div>
-          <div className="flex gap-4 justify-center">
+        {gameOver && (
+          <div className="text-center">
+            <div className="text-red-500 text-xl mb-2">Game Over!</div>
+            <div className="text-white mb-4">Final Score: {score}</div>
             <button className="px-4 py-2 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-bold rounded transition-colors" onClick={() => startGame(false)}>Play Again</button>
-            {hiddenLevelUnlocked && (
-              <button className="px-4 py-2 bg-[#a8a0ff] hover:bg-[#c4bfff] text-white font-bold rounded transition-colors" onClick={() => startGame(true)}>
-                🗡️ Play Hidden Level
-              </button>
-            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Hidden Level Unlock Popup */}
-      {showUnlockPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border-4 border-yellow-400 p-8 text-center pixel-font">
-            <div className="text-yellow-400 text-2xl font-bold mb-4">
-              🌟 SECRET PORTAL DISCOVERED! 🌟
-            </div>
-            <div className="text-white text-lg mb-2">
-              &ldquo;You've found the hidden passage&rdquo;
-            </div>
-            <div className="text-white text-lg mb-4">
-              &ldquo;a mysterious realm awaits the brave {username.trim() || 'warrior'}&rdquo;
-            </div>
-            <div className="text-yellow-300 text-sm mb-6">
-              ⚔️ Enter at your own risk... ⚔️
-            </div>
+        {gameWon && (
+          <div className="text-center">
+            <div className="text-green-500 text-xl mb-2">You Won!</div>
+            <div className="text-white mb-4">Final Score: {score}</div>
             <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => { setShowUnlockPopup(false); startGame(true, true); }}
-                className="px-6 py-3 bg-yellow-400 text-black font-bold border-2 border-yellow-400 hover:bg-yellow-300 hover:border-yellow-300 transition-colors pixel-font"
-              >
-                🌀 Enter the Unknown
-              </button>
-              <button
-                onClick={() => { setShowUnlockPopup(false); startGame(false, true); }}
-                className="px-6 py-3 bg-gray-700 text-yellow-400 font-bold border-2 border-yellow-400 hover:bg-gray-600 hover:border-yellow-300 transition-colors pixel-font"
-              >
-                Stay Safe
-              </button>
+              <button className="px-4 py-2 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-white font-bold rounded transition-colors" onClick={() => startGame(false)}>Play Again</button>
+              {hiddenLevelUnlocked && (
+                <button className="px-4 py-2 bg-[#a8a0ff] hover:bg-[#c4bfff] text-white font-bold rounded transition-colors" onClick={() => startGame(true)}>
+                  🗡️ Play Hidden Level
+                </button>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Level Transition Popup */}
-      {showLevelTransition && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border-4 border-[#ff5ea6] p-8 text-center pixel-font">
-            <div className="text-[#ff5ea6] text-3xl font-bold mb-4">
-              LEVEL CLEARED!
-            </div>
-            <div className="text-white text-xl">
-              Get ready for Level {level}...
+        {/* Hidden Level Unlock Popup */}
+        {showUnlockPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-gray-800 border-4 border-yellow-400 p-8 text-center pixel-font">
+              <div className="text-yellow-400 text-2xl font-bold mb-4">
+                🌟 SECRET PORTAL DISCOVERED! 🌟
+              </div>
+              <div className="text-white text-lg mb-2">
+                &ldquo;You've found the hidden passage&rdquo;
+              </div>
+              <div className="text-white text-lg mb-4">
+                &ldquo;a mysterious realm awaits the brave {username.trim() || 'warrior'}&rdquo;
+              </div>
+              <div className="text-yellow-300 text-sm mb-6">
+                ⚔️ Enter at your own risk... ⚔️
+              </div>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => { setShowUnlockPopup(false); startGame(true, true); }}
+                  className="px-6 py-3 bg-yellow-400 text-black font-bold border-2 border-yellow-400 hover:bg-yellow-300 hover:border-yellow-300 transition-colors pixel-font"
+                >
+                  🌀 Enter the Unknown
+                </button>
+                <button
+                  onClick={() => { setShowUnlockPopup(false); startGame(false, true); }}
+                  className="px-6 py-3 bg-gray-700 text-yellow-400 font-bold border-2 border-yellow-400 hover:bg-gray-600 hover:border-yellow-300 transition-colors pixel-font"
+                >
+                  Stay Safe
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Level indicator */}
-      {isPlaying && isHiddenLevel && (
-        <div className="text-center text-red-400 text-sm font-bold">
-          ⚔️ HIDDEN LEVEL ⚔️
-        </div>
-      )}
+        {/* Level Transition Popup */}
+        {showLevelTransition && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-gray-800 border-4 border-[#ff5ea6] p-8 text-center pixel-font">
+              <div className="text-[#ff5ea6] text-3xl font-bold mb-4">
+                LEVEL CLEARED!
+              </div>
+              <div className="text-white text-xl">
+                Get ready for Level {level}...
+              </div>
+            </div>
+          </div>
+        )}
 
-      {isPlaying && (
-        <div className="text-center text-white text-sm">
-          Use arrow keys to move Pac-Man
-        </div>
-      )}
-    </div>
+        {/* Mobile D-Pad (only visible on small screens when playing) */}
+        {isPlaying && (
+          <div className="md:hidden mt-6 flex flex-col items-center gap-1 touch-none">
+            <button
+              className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-t-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+              onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 3; }}
+            >
+              ⬆️
+            </button>
+            <div className="flex gap-1">
+              <button
+                className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-l-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+                onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 2; }}
+              >
+                ⬅️
+              </button>
+              <div className="w-14 h-14 bg-gray-800 rounded flex items-center justify-center">
+                <div className="w-6 h-6 bg-gray-900 rounded-full opacity-50"></div>
+              </div>
+              <button
+                className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-r-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+                onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 0; }}
+              >
+                ➡️
+              </button>
+            </div>
+            <button
+              className="w-14 h-14 bg-gray-700/80 active:bg-[#ff5ea6] rounded-b-xl flex items-center justify-center text-2xl shadow-[0_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 border-2 border-gray-600 active:border-[#ff5ea6] transition-all"
+              onTouchStart={(e) => { e.preventDefault(); nextDirectionRef.current = 1; }}
+            >
+              ⬇️
+            </button>
+          </div>
+        )}
+
+        {/* Level indicator */}
+        {isPlaying && isHiddenLevel && (
+          <div className="text-center text-red-400 text-sm font-bold mt-4">
+            ⚔️ HIDDEN LEVEL ⚔️
+          </div>
+        )}
+
+        {isPlaying && (
+          <div className="text-center text-white text-sm mt-4">
+            Use arrow keys or D-Pad to move
+          </div>
+        )}
+      </div>
     </div>
   )
 }
