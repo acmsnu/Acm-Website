@@ -40,7 +40,7 @@ const ReactionGame = () => {
 
   // Load username from localStorage
   useEffect(() => {
-    const savedUsername = localStorage.getItem('reactionGame_username')
+    const savedUsername = localStorage.getItem('arcade_username')
     if (savedUsername) {
       setUsername(savedUsername)
     }
@@ -49,7 +49,7 @@ const ReactionGame = () => {
   // Save username to localStorage
   const saveUsername = (name) => {
     setUsername(name)
-    localStorage.setItem('reactionGame_username', name)
+    localStorage.setItem('arcade_username', name)
   }
 
   // Load best time from localStorage

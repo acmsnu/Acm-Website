@@ -324,10 +324,10 @@ export default function HomePage() {
                 <span className="absolute font-silkscreen text-black text-sm xl:text-lg pb-1.5 md:pb-2 pointer-events-none uppercase">EXPLORE EVENTS</span>
               </Link>
 
-              <a href="#team" className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform">
+              <Link to="/games" className="relative inline-flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform">
                 <img src="/purple.webp" alt="Purple button bg" className="w-[160px] md:w-[200px] xl:w-[240px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
-                <span className="absolute font-silkscreen text-black text-sm xl:text-lg pb-1.5 md:pb-2 pointer-events-none uppercase">MEET THE TEAM</span>
-              </a>
+                <span className="absolute font-silkscreen text-black text-sm xl:text-lg pb-1.5 md:pb-2 pointer-events-none uppercase">ENTER ARCADE</span>
+              </Link>
             </div>
           </div>
         </main>

@@ -184,9 +184,12 @@ export default function GamesHub() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="w-full max-w-6xl mx-auto mt-24"
           >
-            <h2 className="text-4xl md:text-5xl font-vt323 text-[#a8a0ff] mb-8 drop-shadow-[0_0_10px_rgba(168,160,255,0.6)]">
+            <h2 className="text-4xl md:text-5xl font-vt323 text-[#a8a0ff] mb-2 drop-shadow-[0_0_10px_rgba(168,160,255,0.6)]">
               HALL OF FAME
             </h2>
+            <p className="text-gray-400 font-vt323 text-xl mb-8 tracking-wide">
+              * Note: Your score will only appear on the public leaderboard if you enter a username before starting the game!
+            </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
               {/* Pac-Man Leaderboard */}

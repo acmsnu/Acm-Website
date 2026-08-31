@@ -14,7 +14,7 @@ const CANVAS_WIDTH = BOARD_WIDTH * CELL_SIZE
 const CANVAS_HEIGHT = BOARD_HEIGHT * CELL_SIZE
 const INITIAL_GAME_SPEED = 7
 const MIN_GAME_SPEED = 2 // Minimum speed (move every 2 frames - faster)
-const SPEED_INCREASE_INTERVAL = 750 // Increase speed every 1000 points (slower progression)
+const SPEED_INCREASE_INTERVAL = 1000 // Increase speed every 1000 points (slower progression)
 // GHOST_SPEED is now calculated dynamically based on Pac-Man's speed
 const MOUTH_ANIMATION_SPEED = 12 // Mouth animation every 12 frames (slower than movement)
 
@@ -107,6 +107,22 @@ const PacManGame = () => {
   const [level, setLevel] = useState(1)
   const [showLevelTransition, setShowLevelTransition] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [hitEffect, setHitEffect] = useState(null)
+
+  // Load username from localStorage on mount
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('arcade_username')
+    if (savedUsername) {
+      setUsername(savedUsername)
+    }
+  }, [])
+
+  // Save username to state and localStorage
+  const saveUsername = (name) => {
+    setUsername(name)
+    localStorage.setItem('arcade_username', name)
+  }
+
   const [deathEffect, setDeathEffect] = useState(false)
   const [pacmanDead, setPacmanDead] = useState(false)
   const [mouthOpen, setMouthOpen] = useState(true)
@@ -122,6 +138,7 @@ const PacManGame = () => {
   const [showPortalEffect, setShowPortalEffect] = useState(false)
   const [username, setUsername] = useState('')
   const [gameCount, setGameCount] = useState(0)
+  const [showInfo, setShowInfo] = useState(false)
 
   // Game state
   const pacmanRef = useRef({ x: 9, y: 15 })
@@ -165,14 +182,14 @@ const PacManGame = () => {
   const submitScore = useCallback(async (finalScore) => {
     try {
       const name = username.trim()
-      
+
       // Don't submit to leaderboard if they didn't provide a username
       // (It will still be saved to their personal best locally if implemented)
       if (!name) {
         console.log('No username provided, score not submitted to public leaderboard')
         return
       }
-      
+
       const playerId = getPlayerId()
       console.log('Submitting score:', finalScore, 'for', name)
 
@@ -508,8 +525,8 @@ const PacManGame = () => {
       // Main body
       let currentGhostColor = ghost.color
       if (powerModeRef.current) {
-        // Flicker white when power is running out (< 180 frames / 3 seconds)
-        if (powerTimerRef.current < 180 && Math.floor(powerTimerRef.current / 15) % 2 === 0) {
+        // Flicker white when power is running out (< 2000 ms)
+        if (powerTimerRef.current < 2000 && Math.floor(powerTimerRef.current / 250) % 2 === 0) {
           currentGhostColor = '#FFFFFF'
         } else {
           currentGhostColor = '#0000FF'
@@ -657,9 +674,11 @@ const PacManGame = () => {
         boardRef.current[pacmanRef.current.y][pacmanRef.current.x] = 0 // Remove pellet
         scoreRef.current += 50
         setScore(prev => prev + 50)
-        powerModeRef.current = true
-        powerTimerRef.current = Math.max(60, 300 - ((level - 1) * 60)) // Scale down duration by 1s per level
-        hitEffectsRef.current.push({ x: pacman.x, y: pacman.y, text: 'POWER!', timer: 60 })
+        if (!powerModeRef.current) {
+          powerModeRef.current = true
+          powerTimerRef.current = Math.max(1000, 5000 - ((level - 1) * 1000)) // Scale down duration by 1s per level
+        }
+        hitEffectsRef.current.push({ x: pacman.x, y: pacman.y, text: 'POWER!', timer: 1000 })
 
         // Check if this is the sword pellet in hidden level
         if (isHiddenLevel && !hasSword && newX === 8 && newY === 16) {
@@ -690,47 +709,47 @@ const PacManGame = () => {
             // Hit the boss with sword - reduce HP and teleport boss to safe location
             // Add boss hit effect
             hitEffectsRef.current.push({
-              x: boss.x, 
-              y: boss.y, 
+              x: boss.x,
+              y: boss.y,
               text: 'BOSS UNLOCKED!',
               timer: 120
             })
-            
+
             setBossHP(prev => prev - 1)
             bossRegenTimerRef.current = 0
 
             if (bossHP - 1 <= 0) {
-                // Boss defeated!
-                setBossDefeated(true)
-                setScore(prevScore => prevScore + 500) // Big bonus for defeating boss
-                // Win the hidden level
-                setGameWon(true)
-                setIsPlaying(false)
-                submitScore(score + 500)
-              } else {
-                // Boss takes damage but survives - teleport to safe location
-                console.log(`Boss hit! HP: ${bossHP - 1}/3 - Teleporting to safe location`)
+              // Boss defeated!
+              setBossDefeated(true)
+              setScore(prevScore => prevScore + 500) // Big bonus for defeating boss
+              // Win the hidden level
+              setGameWon(true)
+              setIsPlaying(false)
+              submitScore(score + 500)
+            } else {
+              // Boss takes damage but survives - teleport to safe location
+              console.log(`Boss hit! HP: ${bossHP - 1}/3 - Teleporting to safe location`)
 
-                // Teleport boss to one of several safe locations
-                const safeLocations = [
-                  { x: 1, y: 1 },   // Top-left corner
-                  { x: 17, y: 1 },  // Top-right corner
-                  { x: 1, y: 19 },  // Bottom-left corner
-                  { x: 17, y: 19 }, // Bottom-right corner
-                  { x: 9, y: 10 },  // Center area
-                  { x: 5, y: 5 },   // Upper left area
-                  { x: 13, y: 5 },  // Upper right area
-                  { x: 5, y: 15 },  // Lower left area
-                  { x: 13, y: 15 }  // Lower right area
-                ]
+              // Teleport boss to one of several safe locations
+              const safeLocations = [
+                { x: 1, y: 1 },   // Top-left corner
+                { x: 17, y: 1 },  // Top-right corner
+                { x: 1, y: 19 },  // Bottom-left corner
+                { x: 17, y: 19 }, // Bottom-right corner
+                { x: 9, y: 10 },  // Center area
+                { x: 5, y: 5 },   // Upper left area
+                { x: 13, y: 5 },  // Upper right area
+                { x: 5, y: 15 },  // Lower left area
+                { x: 13, y: 15 }  // Lower right area
+              ]
 
-                // Choose random safe location
-                const safeLocation = safeLocations[Math.floor(Math.random() * safeLocations.length)]
-                bossRef.current = { x: safeLocation.x, y: safeLocation.y }
-                console.log(`Boss teleported to (${safeLocation.x}, ${safeLocation.y})`)
+              // Choose random safe location
+              const safeLocation = safeLocations[Math.floor(Math.random() * safeLocations.length)]
+              bossRef.current = { x: safeLocation.x, y: safeLocation.y }
+              console.log(`Boss teleported to (${safeLocation.x}, ${safeLocation.y})`)
 
-                setScore(prevScore => prevScore + 50) // Small bonus for hitting boss
-              }
+              setScore(prevScore => prevScore + 50) // Small bonus for hitting boss
+            }
           } else {
             // Can't defeat boss without sword - take damage
             setDeathAnimation(true)
@@ -761,8 +780,8 @@ const PacManGame = () => {
 
           // Add portal effect
           hitEffectsRef.current.push({
-            x: pacman.x, 
-            y: pacman.y, 
+            x: pacman.x,
+            y: pacman.y,
             text: 'SWORD ACQUIRED!',
             timer: 90
           })
@@ -916,29 +935,32 @@ const PacManGame = () => {
           // Eat ghost during power mode
           console.log(`👻 Ghost ${index} eaten!`)
           setScore(prevScore => prevScore + 200)
-          hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: '+200', timer: 30 })
+          hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: '+200', timer: 500 })
           // Respawn immediately at center
           ghost.x = 9
           ghost.y = 9
         } else if (isHiddenLevel && hasSword) {
           // Kill the ghost with sword (hidden level only)
           console.log(`⚔️ Ghost ${index} defeated by sword!`)
-          hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: 'HIT!', timer: 60 })
-              
+          hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: 'HIT!', timer: 1000 })
+
           // Boss dies
           if (bossHP - 1 <= 0) {
             setBossDefeated(true)
             setBossHP(0)
             setScore(prev => prev + 5000)
-            hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: '5000', timer: 120 })
+            hitEffectsRef.current.push({ x: ghost.x, y: ghost.y, text: '5000', timer: 2000 })
           } else {
+            // Boss takes damage
             setBossHP(prev => prev - 1)
+            // Send ghost back to center and mark it as dead
+            ghost.x = 9
+            ghost.y = 9
+            deadGhostsRef.current.push({
+              index: index,
+              timer: 15000 // 15 seconds in ms
+            })
           }
-
-          deadGhostsRef.current.push({
-            index: index,
-            respawnTime: frameCountRef.current + 900 // 15 seconds = 900 frames at 60fps
-          })
           setScore(prevScore => prevScore + 200) // Bonus for killing ghost
         } else {
           // Normal ghost collision - lose life (both regular and hidden level without sword)
@@ -1049,7 +1071,7 @@ const PacManGame = () => {
   // Update boss particles
   const updateBossParticles = useCallback(() => {
     if (bossParticlesRef.current.length === 0) return
-    
+
     bossParticlesRef.current = bossParticlesRef.current.map(particle => {
       const pacman = pacmanRef.current
       if (!particle.active) return particle
@@ -1131,28 +1153,29 @@ const PacManGame = () => {
           updateBossParticles()
         }
 
-        // Process effects every frame (60fps)
+        // Process effects (ms based)
         if (hitEffectsRef.current.length > 0) {
           hitEffectsRef.current = hitEffectsRef.current.map(effect => ({
             ...effect,
-            timer: effect.timer - 1
+            timer: effect.timer - FIXED_TIME_STEP
           })).filter(effect => effect.timer > 0)
         }
 
         // Update power timer
         if (powerModeRef.current) {
-          if (powerTimerRef.current <= 1) {
+          if (powerTimerRef.current <= FIXED_TIME_STEP) {
             powerModeRef.current = false
             powerTimerRef.current = 0
           } else {
-            powerTimerRef.current -= 1
+            powerTimerRef.current -= FIXED_TIME_STEP
           }
         }
 
-        // Respawn dead ghosts after 15 seconds (900 frames)
+        // Respawn dead ghosts after 15 seconds
         if (deadGhostsRef.current.length > 0) {
           deadGhostsRef.current = deadGhostsRef.current.filter(deadGhost => {
-            if (frameCountRef.current >= deadGhost.respawnTime) {
+            deadGhost.timer -= FIXED_TIME_STEP
+            if (deadGhost.timer <= 0) {
               console.log(`👻 Ghost ${deadGhost.index} respawned!`)
               return false
             }
@@ -1162,13 +1185,11 @@ const PacManGame = () => {
 
         // Boss regeneration
         if (isHiddenLevel && bossActive && !bossDefeated && bossHP < 3) {
-          const newTimer = bossRegenTimerRef.current + 1
-          if (newTimer >= 1200) {
+          bossRegenTimerRef.current += FIXED_TIME_STEP
+          if (bossRegenTimerRef.current >= 10000) {
             console.log('🩸 Boss regenerating 1 HP!')
             setBossHP(prev => Math.min(prev + 1, 3))
             bossRegenTimerRef.current = 0
-          } else {
-            bossRegenTimerRef.current = newTimer
           }
         }
 
@@ -1384,33 +1405,68 @@ const PacManGame = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#0d071d] pt-24 pb-12 font-vt323 relative">
-      <Link to="/games" className="absolute top-8 left-8 text-[#ff5ea6] hover:text-[#ff8cbe] flex items-center gap-2 font-vt323 text-2xl transition-colors">
-        <ChevronLeft /> Back to Arcade
+    <div className="min-h-screen bg-[#0d071d] pt-4 pb-2 font-vt323 relative flex flex-col items-center overflow-x-hidden">
+      <Link to="/games" className="absolute top-4 left-4 min-[400px]:top-8 min-[400px]:left-8 text-[#ff5ea6] hover:text-[#ff8cbe] flex items-center gap-1 min-[400px]:gap-2 font-vt323 text-xl min-[400px]:text-2xl transition-colors z-10">
+        <ChevronLeft /> Back
       </Link>
-      <div className="flex flex-col items-center gap-4 p-4">
+
+      <button
+        onClick={() => setShowInfo(true)}
+        className="absolute top-4 right-4 min-[400px]:top-8 min-[400px]:right-8 text-[#ff5ea6] hover:text-[#ff8cbe] hover:bg-[#ff5ea6]/10 flex items-center justify-center w-8 h-8 border-2 border-current rounded-full font-sans font-bold text-xl transition-all z-10"
+        title="Game Rules"
+      >
+        i
+      </button>
+
+      {/* Rules Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1a0f30] border-2 border-[#ff5ea6] rounded-xl p-6 min-[400px]:p-8 max-w-lg w-full relative drop-shadow-[0_0_15px_rgba(255,94,166,0.3)]">
+            <button
+              onClick={() => setShowInfo(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white font-sans text-xl"
+            >
+              ✕
+            </button>
+            <h2 className="text-4xl text-[#ff5ea6] mb-6 drop-shadow-md text-center">Game Rules</h2>
+            <div className="text-white text-lg min-[400px]:text-xl space-y-4 font-sans font-light">
+              <p>• <strong className="text-yellow-400 font-vt323 text-2xl min-[400px]:text-3xl tracking-wide">Dots:</strong> Eat small dots to gain points.</p>
+              <p>• <strong className="text-yellow-400 font-vt323 text-2xl min-[400px]:text-3xl tracking-wide">Power Pellets:</strong> Eat the 4 large flashing dots in the corners to turn ghosts blue!</p>
+              <p>• <strong className="text-[#a8a0ff] font-vt323 text-2xl min-[400px]:text-3xl tracking-wide">Blue Ghosts:</strong> While ghosts are blue, you can eat them for bonus 50 points. They will flicker before turning back.</p>
+              <p>• <strong className="text-red-400 font-vt323 text-2xl min-[400px]:text-3xl tracking-wide">Lives:</strong> Avoid normal ghosts! You have 3 lives.</p>
+              <p>• <strong className="text-[#00ffff] font-vt323 text-2xl min-[400px]:text-3xl tracking-wide">Controls:</strong> Use Arrow Keys, WASD, or the on-screen D-Pad to move.</p>
+            </div>
+            <button
+              onClick={() => setShowInfo(false)}
+              className="mt-8 w-full py-2 bg-[#ff5ea6] hover:bg-[#ff8cbe] text-black font-vt323 text-3xl rounded transition-colors"
+            >
+              GOT IT!
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col items-center gap-2 p-2 min-[400px]:gap-4 min-[400px]:p-4 w-full mt-8 min-[400px]:mt-4">
         {/* Username input */}
         {!isPlaying && (
           <div className="mb-4">
-            <label className="text-white text-sm mb-2 block">Enter your name:</label>
+            <label className="text-white text-xl mb-2 block">Enter your name:</label>
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="warrior"
-              className="px-3 py-2 bg-gray-800 text-white border border-gray-600 rounded focus:outline-none focus:border-blue-500"
-              maxLength={20}
+              onChange={(e) => saveUsername(e.target.value)}
+              placeholder="Guest"
+              maxLength={15}
+              className="px-3 py-1 bg-gray-900 border border-gray-700 rounded text-white text-lg font-vt323 text-center focus:outline-none focus:border-[#ff5ea6] placeholder-gray-600 transition-colors"
             />
           </div>
         )}
 
-        <div className="flex gap-8 text-white">
+        <div className="flex justify-center gap-6 min-[400px]:gap-12 w-full text-white font-vt323 text-2xl mb-6 drop-shadow-md">
           <div>Score: {score}</div>
           <div>Level: {level}</div>
           <div>Lives: {lives}</div>
         </div>
-
-
 
         {/* HP Bars for Hidden Level */}
         {isPlaying && isHiddenLevel && (
