@@ -966,8 +966,11 @@ export default function HomePage() {
 
           </div>
 
-          <p className="font-vt323 text-gray-500 mt-4 mb-4 md:mb-6 text-xl tracking-widest">
+          <p className="font-vt323 text-gray-500 mt-4 mb-1 text-xl tracking-widest">
             © 2026 ACM SNIoE Student Chapter
+          </p>
+          <p className="font-vt323 text-gray-600 mb-4 md:mb-6 text-lg tracking-wider">
+            Designed & Developed by <a href="https://www.linkedin.com/in/om-tiwari-240817247" target="_blank" rel="noreferrer" className="hover:text-[#ff5ea6] transition-colors">dionysus2359</a>
           </p>
         </motion.div>
 
