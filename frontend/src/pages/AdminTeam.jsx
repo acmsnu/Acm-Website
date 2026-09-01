@@ -288,7 +288,7 @@ export default function AdminTeam() {
       ) : (
         <>
           {renderSection(coreMembers, 'Core Team', coreOpen, setCoreOpen)}
-          {renderSection(subcoreMembers, 'Party Members (Subcore)', subcoreOpen, setSubcoreOpen)}
+          {renderSection(subcoreMembers, 'Elite Vanguard (Subcore)', subcoreOpen, setSubcoreOpen)}
           {renderSection(facultyMembers, 'Faculty Sponsors', facultyOpen, setFacultyOpen)}
         </>
       )}

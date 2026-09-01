@@ -24,6 +24,7 @@ const ReactionGame = () => {
   const [roundTimes, setRoundTimes] = useState([])
   const [username, setUsername] = useState('')
   const [falseStart, setFalseStart] = useState(false)
+  const [currentRoundPenalty, setCurrentRoundPenalty] = useState(0)
   const [countdown, setCountdown] = useState(3)
   const [ripple, setRipple] = useState({
     active: false,
@@ -143,6 +144,7 @@ const ReactionGame = () => {
       setRound(1)
       setRoundTimes([])
       setCountdown(3)
+      setCurrentRoundPenalty(0)
       setGameState('waiting')
 
       // Countdown before first round
@@ -176,7 +178,12 @@ const ReactionGame = () => {
 
   // Handle spacebar press
   const handleSpacePress = useCallback(() => {
-    if (gameState === 'waiting' || gameState === 'idle') {
+    // Do nothing if game is not actively waiting or ready
+    if (gameState === 'idle' || gameState === 'countdown' || gameState === 'results') {
+      return
+    }
+
+    if (gameState === 'waiting') {
       // False start - trigger red ripple
       triggerRipple('red')
       setFalseStart(true)
@@ -184,13 +191,15 @@ const ReactionGame = () => {
         clearTimeout(timeoutRef.current)
       }
 
-      // Wait for ripple animation (300ms) + brief pause (150ms) before restarting
+      // Add a 200ms penalty for false start (stays on same round)
+      const penaltyTime = 200
+      setCurrentRoundPenalty(prev => prev + penaltyTime)
+
+      // Wait a bit longer (700ms) so they can read the penalty text, then restart same round
       setTimeout(() => {
         setFalseStart(false)
-        if (gameState === 'waiting') {
-          startRound()
-        }
-      }, 450)
+        startRound()
+      }, 700)
 
       return
     }
@@ -206,11 +215,14 @@ const ReactionGame = () => {
       triggerRipple('green')
 
       const endTime = Date.now()
-      const reaction = endTime - startTimeRef.current
-      setReactionTime(reaction)
+      const rawReaction = endTime - startTimeRef.current
+      const finalReaction = rawReaction + currentRoundPenalty
+      
+      setReactionTime(finalReaction)
 
-      const newRoundTimes = [...roundTimes, reaction]
+      const newRoundTimes = [...roundTimes, finalReaction]
       setRoundTimes(newRoundTimes)
+      setCurrentRoundPenalty(0) // Reset penalty for the next round
 
       // Wait for ripple animation (300ms) + transition delay (150ms) before proceeding
       setTimeout(() => {
@@ -233,6 +245,11 @@ const ReactionGame = () => {
   // Keyboard event listener for spacebar
   useEffect(() => {
     const handleKeyPress = (event) => {
+      // Ignore space if user is typing in an input
+      if (document.activeElement.tagName === 'INPUT') {
+        return;
+      }
+      
       if (event.code === 'Space' || event.key === ' ') {
         event.preventDefault() // Prevent page scrolling
         handleSpacePress()
@@ -266,7 +283,7 @@ const ReactionGame = () => {
 
   // Get instruction text
   const getInstructionText = () => {
-    if (falseStart) return 'Too early! Wait for green...'
+    if (falseStart) return 'Too early! Penalty: +200ms'
     if (countdown > 0 && gameState === 'waiting') return `Starting in ${countdown}...`
     if (gameState === 'idle') return 'Press "Start Game" to begin'
     if (gameState === 'waiting') return 'Wait for green...'

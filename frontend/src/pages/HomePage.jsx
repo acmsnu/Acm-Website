@@ -721,7 +721,7 @@ export default function HomePage() {
           </div>
 
           <h3 className="font-pixelify text-3xl md:text-5xl text-white mb-2 md:mb-4 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] uppercase">
-            Party Members
+            Elite Vanguard
           </h3>
           <p className="font-vt323 text-lg md:text-2xl text-[#ff8cbe] drop-shadow-[1px_1px_0_rgba(0,0,0,0.8)] mb-8 md:mb-12 animate-pulse cursor-default">
             Click to inspect member stats!

@@ -245,7 +245,6 @@ export default function GamesHub() {
                         <tr className="text-[#a8a0ff] border-b border-[#a8a0ff]/30">
                           <th className="pb-3 w-16 text-center">Rank</th>
                           <th className="pb-3">Player</th>
-                          <th className="pb-3 text-center">Mode</th>
                           <th className="pb-3 text-right">Time</th>
                         </tr>
                       </thead>
@@ -256,7 +255,6 @@ export default function GamesHub() {
                               {idx === 0 ? '🏆' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
                             </td>
                             <td className="py-3 text-white truncate max-w-[100px] font-bold">{score.nickname}</td>
-                            <td className="py-3 text-gray-400 text-center text-sm">{score.difficulty || '-'}</td>
                             <td className="py-3 text-green-400 text-right font-bold">{score.best_score}ms</td>
                           </tr>
                         ))}
