@@ -234,18 +234,18 @@ export default function HomePage() {
 
         {/* Hero Section Center Image */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
-          <img src="/sage.webp" alt="Hero Background" className="w-[85vw] min-[400px]:w-[100vw] xl:w-[900px] 2xl:w-[600px] max-w-none h-auto object-contain opacity-90" style={{ imageRendering: 'pixelated' }} />
+          <img src="/sage.webp" alt="Hero Background" className="w-[85vw] min-[400px]:w-[100vw] xl:w-[900px] 2xl:w-[600px] h-auto max-h-[60vh] xl:max-h-[65vh] max-w-none object-contain opacity-90" style={{ imageRendering: 'pixelated' }} />
         </div>
 
         {/* Navbar */}
-        <header className="flex justify-between items-center p-3 xl:p-6 z-50 relative">
-          <div className="flex items-center gap-3 relative z-50">
+        <header className="flex flex-wrap justify-between items-center p-3 xl:p-6 z-50 relative gap-y-4">
+          <div className="flex items-center gap-3 relative z-50 shrink-0">
             <img src="/acm-logo.webp" alt="ACM Logo" className="w-12 h-12 md:w-13 xl:w-14 xl:h-14" style={{ imageRendering: 'auto' }} />
             <img src="/logoacnsnioe.webp" alt="ACM SNIOE Logo" className="h-10 md:h-14 xl:h-16 w-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
           </div>
 
           {/* Right Side: Navigation & Actions */}
-          <div className="flex items-center gap-2 md:gap-4 xl:gap-6 relative z-50">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 xl:gap-6 relative z-50 justify-end">
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-4 xl:gap-6 font-vt323 text-xl md:text-2xl xl:tracking-wider">
               <Link to="/" className="text-[#ff5ea6] underline underline-offset-4 decoration-2 font-bold">Home</Link>
@@ -293,20 +293,20 @@ export default function HomePage() {
 
           {/* Title */}
           <div className="mb-2 select-none pt-6 min-[420px]:pt-16 xl:pt-0 flex flex-col items-center">
-            <img src="/acmsnioe.webp" alt="ACM SNIOE Title" className="w-[260px] min-[400px]:w-[300px] md:w-[380px] xl:w-[480px] h-auto mb-2 pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+            <img src="/acmsnioe.webp" alt="ACM SNIOE Title" className="w-[260px] min-[400px]:w-[300px] md:w-[380px] xl:w-[480px] max-h-[15vh] h-auto mb-2 pointer-events-none object-contain" style={{ imageRendering: 'pixelated' }} />
           </div>
 
           {/* Spacer that pushes content to bottom on tablets/phones, acts as fixed height on laptops */}
-          <div className="w-full flex-1 max-h-[80px] min-[420px]:max-h-none xl:flex-none xl:h-48 pointer-events-none"></div>
+          <div className="w-full flex-1 max-h-[80px] min-[420px]:max-h-none xl:max-h-48 xl:min-h-[2rem] pointer-events-none shrink"></div>
 
           <div className="flex flex-col items-center w-full mt-auto z-10">
             {/* White Pill Button (Everybody's) - Tilted slightly */}
             <div className="relative inline-flex items-center justify-center -rotate-[2deg] mb-1 cursor-pointer">
-              <img src="/white.webp" alt="Everybody's Pill bg" className="w-[220px] min-[420px]:w-[260px] md:w-[340px] xl:w-[420px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
-              <span className="absolute font-pixelify text-black text-xl min-[400px]:text-2xl md:text-4xl xl:text-5xl tracking-tight -mt-1 md:-mt-2 font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)]">Everybody's</span>
+              <img src="/white.webp" alt="Everybody's Pill bg" className="w-[220px] min-[420px]:w-[260px] md:w-[320px] xl:w-[360px] 2xl:w-[420px] h-auto pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+              <span className="absolute font-pixelify text-black text-xl min-[400px]:text-2xl md:text-3xl xl:text-4xl 2xl:text-5xl tracking-tight -mt-1 md:-mt-2 font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,0.2)]">Everybody's</span>
             </div>
 
-            <h3 className="text-[#ff5ea6] font-pixelify text-2xl min-[400px]:text-3xl md:text-4xl xl:text-5xl mb-3 drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
+            <h3 className="text-[#ff5ea6] font-pixelify text-2xl min-[400px]:text-3xl md:text-4xl xl:text-4xl 2xl:text-5xl mb-3 drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)]">
               Invited.
             </h3>
 
