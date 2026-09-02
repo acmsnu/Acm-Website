@@ -236,6 +236,8 @@ export default function HomePage() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[5]">
           <img src="/sage.webp" alt="Hero Background" className="w-[85vw] min-[400px]:w-[100vw] xl:w-[900px] 2xl:w-[600px] h-auto max-h-[60vh] xl:max-h-[65vh] max-w-none object-contain opacity-90" style={{ imageRendering: 'pixelated' }} />
         </div>
+        {/* Secret Easter Egg */}
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="absolute top-2 left-1/2 w-4 h-4 opacity-0 z-[100] cursor-pointer" title="Shh"></a>
 
         {/* Navbar */}
         <header className="flex flex-wrap justify-between items-center p-3 xl:p-6 z-50 relative gap-y-4">
