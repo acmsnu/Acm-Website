@@ -67,6 +67,9 @@ export default function AdminLogin() {
         <img src="/bgclouds2.webp" alt="Clouds" className="w-full h-full object-cover" style={{ imageRendering: 'pixelated' }} />
       </div>
 
+      {/* Fake Star Easter Egg */}
+      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="absolute top-[15%] right-[15%] md:top-[20%] md:right-[20%] w-3 h-3 bg-[#ff5ea6] shadow-[0_0_15px_#ff5ea6] rotate-45 cursor-pointer z-50 animate-[pulse_2s_ease-in-out_infinite] hover:scale-150 transition-transform" title="A weird star..."></a>
+
       <div className="z-10 bg-[#1a0f30]/80 p-8 md:p-12 rounded-xl border-[4px] border-[#ff5ea6] shadow-[8px_8px_0_rgba(255,94,166,0.3)] w-full max-w-md relative">
         <h2 className="font-pixelify text-4xl md:text-5xl text-center mb-2 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
           Admin <span className="text-[#ff5ea6]">Access</span>
